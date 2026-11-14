@@ -1,9 +1,10 @@
-torch
-torchvision
+fastapi
+uvicorn
+sqlalchemy
+python-multipart
+torch --index-url https://download.pytorch.org/whl/cpu
+torchvision --index-url https://download.pytorch.org/whl/cpu
 numpy
 Pillow
 scikit-learn
-matplotlib
-opencv-python
-streamlit
-reportlab
+opencv-python-headless
