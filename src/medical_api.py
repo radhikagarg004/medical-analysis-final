@@ -1,85 +1,10 @@
 
-# from fastapi import FastAPI, UploadFile, File, HTTPException
-# from pathlib import Path
-# import tempfile
-# import os
-
-# from src.predict import predict_image
-
-# app = FastAPI(
-#     title="MedVision AI API",
-#     description="Chest X-ray classification API",
-#     version="1.0"
-# )
-
-
-# @app.get("/")
-# def home():
-#     return {
-#         "message": "Welcome to MedVision AI API",
-#         "status": "Running"
-#     }
-
-
-# @app.post("/predict")
-# async def predict(file: UploadFile = File(...)):
-
-#     allowed_types = [
-#         "image/jpeg",
-#         "image/png"
-#     ]
-
-#     if file.content_type not in allowed_types:
-#         raise HTTPException(
-#             status_code=400,
-#             detail="Please upload a JPG or PNG image."
-#         )
-
-#     content = await file.read()
-
-#     if not content:
-#         raise HTTPException(
-#             status_code=400,
-#             detail="Uploaded image is empty."
-#         )
-
-#     if len(content) > 10 * 1024 * 1024:
-#         raise HTTPException(
-#             status_code=413,
-#             detail="Image must be smaller than 10 MB."
-#         )
-
-#     temp_path = None
-
-#     try:
-#         with tempfile.NamedTemporaryFile(
-#             suffix=Path(file.filename or "image.jpg").suffix,
-#             delete=False
-#         ) as temp:
-#             temp.write(content)
-#             temp_path = temp.name
-
-#         result = predict_image(temp_path)
-
-#         return {
-#             "filename": file.filename,
-#             "prediction": result
-#         }
-
-#     except Exception as e:
-#         raise HTTPException(
-#             status_code=400,
-#             detail=str(e)
-#         )
-
-#     finally:
-#         if temp_path and os.path.exists(temp_path):
-#             os.remove(temp_path)
 
 
 
 from src.similarity import find_similar_images
 from src.uncertainty import estimate_uncertainty
+UNCERTAINTY_THRESHOLD = 5.0
 
 from src.image_quality import check_image_quality
 from fastapi import FastAPI, UploadFile, File, HTTPException
@@ -332,6 +257,11 @@ async def analyze_image(file: UploadFile = File(...)):
         uncertainty_result = estimate_uncertainty(temp_path, num_passes=20)
         similar_images = find_similar_images(temp_path, top_k=5)
 
+        review_required = (
+        quality_result["quality_status"] == "Needs Review"
+        or uncertainty_result["uncertainty_score"] >= UNCERTAINTY_THRESHOLD
+        )
+
         #Step 3: Return combined results
         return {
             "filename": file.filename,
@@ -339,14 +269,21 @@ async def analyze_image(file: UploadFile = File(...)):
             "prediction": prediction_result,
             "uncertainty_assessment": uncertainty_result,
             "similar_images": similar_images,
-            "review_required": (
-                quality_result["quality_status"]
-                == "Needs Review"
-            ),
+            # "review_required": (
+            #     quality_result["quality_status"]
+            #     == "Needs Review"
+            # ),
+            # "message": (
+            #     "Analysis completed. Review image quality warnings."
+            #     if quality_result["quality_status"] == "Needs Review"
+            #     else "Analysis completed."
+            # )
+            "uncertainty_threshold": UNCERTAINTY_THRESHOLD,
+            "review_required": review_required,
             "message": (
-                "Analysis completed. Review image quality warnings."
-                if quality_result["quality_status"] == "Needs Review"
-                else "Analysis completed."
+                "Human Review Recommended: Image quality or prediction uncertainty requires review."
+                if review_required
+                else "Analysis completed. No automatic review flag triggered."
             )
         }
 
