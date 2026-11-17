@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedVision AI | Clinical EMR</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #2563eb; --bg: #f8fafc; --sidebar: #0f172a;
+            --text-main: #1e293b; --text-muted: #64748b; --border: #e2e8f0;
+            --card: #ffffff; --danger: #dc2626; --success: #059669;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+
+        /* SIDEBAR */
+        .sidebar { width: 250px; background: var(--sidebar); display: flex; flex-direction: column; }
+        .brand { font-size: 18px; font-weight: 700; color: white; padding: 24px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .brand i { color: var(--primary); }
+        .nav { flex: 1; padding: 20px 0; }
+        .nav-item { padding: 14px 24px; color: #94a3b8; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.2s; border-left: 3px solid transparent; }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: white; }
+        .nav-item.active { background: rgba(37,99,235,0.1); color: var(--primary); border-left-color: var(--primary); }
+        .nav-footer { padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 12px; }
+        .avatar { width: 36px; height: 36px; background: var(--primary); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: 600; font-size: 14px; }
+        .nav-footer-info h4 { font-size: 13px; color: white; }
+        .nav-footer-info p { font-size: 11px; color: #94a3b8; }
+
+        /* MAIN */
+        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .topbar { height: 60px; background: white; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 24px; }
+        .topbar h1 { font-size: 18px; font-weight: 600; }
+        .content { flex: 1; padding: 24px; overflow-y: auto; }
+        .page-section { display: none; }
+        .page-section.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* PATIENT BAR */
+        .patient-bar { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 24px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 2fr; gap: 20px; align-items: end; }
+        .input-group { display: flex; flex-direction: column; gap: 5px; }
+        .input-group label { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+        .input-group input { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; outline: none; }
+        .input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37,99,235,0.1); }
+
+        /* MAIN GRID */
+        .main-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; margin-bottom: 24px; }
+        .card { background: white; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+        .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; background: #f8fafc; }
+        .card-header i { color: var(--primary); }
+        .card-body { padding: 20px; }
+
+        /* UPLOAD */
+        .upload-box { border: 2px dashed var(--border); border-radius: 8px; padding: 30px; text-align: center; cursor: pointer; transition: 0.2s; display: block; }
+        .upload-box:hover { border-color: var(--primary); background: #eff6ff; }
+        .upload-box i { font-size: 32px; color: var(--text-muted); margin-bottom: 10px; }
+        .upload-box p { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+        #imagePreview { max-width: 100%; max-height: 300px; border-radius: 8px; display: none; margin: 0 auto; }
+        .quality-alert { margin-top: 15px; padding: 10px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; font-size: 12px; color: #166534; }
+        .btn-analyze { margin-top: 15px; width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .btn-analyze:hover { background: #1d4ed8; }
+
+        /* RESULT */
+        .diagnosis-title { font-size: 24px; font-weight: 700; color: var(--danger); margin-bottom: 5px; }
+        .risk-tag { display: inline-block; padding: 4px 10px; background: var(--danger); color: white; font-size: 11px; font-weight: 700; border-radius: 4px; }
+        .confidence-box { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+        .conf-item { background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid var(--border); }
+        .conf-item p { font-size: 12px; color: var(--text-muted); font-weight: 500; margin-bottom: 4px; }
+        .conf-item h3 { font-size: 22px; font-weight: 700; }
+        .rec-box { background: #eff6ff; border-left: 4px solid var(--primary); padding: 15px; border-radius: 0 6px 6px 0; font-size: 13px; color: var(--text-main); }
+
+        /* BOTTOM GRID */
+        .bottom-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+        .prob-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+        .prob-label { width: 100px; font-size: 12px; font-weight: 600; }
+        .prob-track { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+        .prob-fill { height: 100%; border-radius: 4px; }
+        .prob-value { width: 40px; text-align: right; font-size: 12px; font-weight: 700; }
+        .gradcam-wrap { position: relative; border-radius: 6px; overflow: hidden; }
+        .gradcam-wrap img { width: 100%; display: block; }
+        .gradcam-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 40% 60%, rgba(239, 68, 68, 0.6) 0%, rgba(245, 158, 11, 0.3) 30%, transparent 60%); mix-blend-mode: multiply; }
+        .similar-row { display: flex; gap: 10px; margin-top: 15px; }
+        .similar-item { flex: 1; text-align: center; font-size: 11px; font-weight: 700; }
+        .similar-item img { width: 100%; height: 70px; object-fit: cover; border-radius: 6px; margin-bottom: 5px; border: 2px solid var(--border); }
+
+        /* TABLES */
+        .history-table { width: 100%; border-collapse: collapse; }
+        .history-table th, .history-table td { padding: 14px 20px; text-align: left; border-bottom: 1px solid var(--border); font-size: 14px; }
+        .history-table th { background: #f8fafc; color: var(--text-muted); font-size: 12px; font-weight: 600; text-transform: uppercase; }
+        .history-table tr:hover { background: #f8fafc; }
+
+        /* ANALYTICS */
+        .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+        .stat-card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 24px; display: flex; align-items: center; gap: 20px; }
+        .stat-icon { width: 60px; height: 60px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 24px; }
+        .stat-info h3 { font-size: 28px; font-weight: 700; color: var(--text-main); }
+        .stat-info p { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+        .chart-card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 20px; }
+        .chart-container { height: 300px; position: relative; margin-top: 15px; }
+
+        /* SETTINGS */
+        .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        .settings-card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 24px; }
+        .settings-card h3 { font-size: 16px; margin-bottom: 20px; color: var(--text-main); border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { font-size: 13px; font-weight: 600; color: var(--text-main); display: block; margin-bottom: 6px; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; outline: none; }
+        .toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+        .toggle-row:last-child { border-bottom: none; }
+        .toggle-switch { position: relative; width: 44px; height: 24px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(20px); }
+        .btn-save { background: var(--primary); color: white; padding: 12px 24px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 15px; }
+
+        /* CHATBOT */
+        .chat-toggle { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; background: var(--primary); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 22px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; }
+        .chat-panel { position: fixed; bottom: 90px; right: 24px; width: 320px; height: 420px; background: white; border: 1px solid var(--border); border-radius: 12px; display: none; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 100; }
+        .chat-panel.active { display: flex; }
+        .chat-top { background: var(--sidebar); color: white; padding: 15px; display: flex; justify-content: space-between; border-radius: 12px 12px 0 0; }
+        .chat-top h4 { font-size: 14px; }
+        .chat-msgs { flex: 1; padding: 15px; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 10px 14px; border-radius: 8px; font-size: 13px; max-width: 85%; line-height: 1.4; }
+        .msg.bot { background: white; border: 1px solid var(--border); align-self: flex-start; }
+        .msg.user { background: var(--primary); color: white; align-self: flex-end; }
+        .chat-input-wrap { padding: 12px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+        .chat-input-wrap input { flex: 1; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; outline: none; font-size: 13px; }
+        .chat-send { background: var(--primary); border: none; width: 36px; border-radius: 6px; color: white; cursor: pointer; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="brand"><i class="fa-solid fa-heart-pulse"></i> MedVision EMR</div>
+        <nav class="nav">
+            <div class="nav-item active" onclick="showPage('diagnosis', this)"><i class="fa-solid fa-stethoscope"></i> New Diagnosis</div>
+            <div class="nav-item" onclick="showPage('history', this)"><i class="fa-solid fa-database"></i> Patient Records</div>
+            <div class="nav-item" onclick="showPage('analytics', this)"><i class="fa-solid fa-chart-pie"></i> Analytics</div>
+            <div class="nav-item" onclick="showPage('settings', this)"><i class="fa-solid fa-gear"></i> Settings</div>
+        </nav>
+        <div class="nav-footer">
+            <div class="avatar">DR</div>
+            <div class="nav-footer-info"><h4>Dr. Komal</h4><p>Radiology</p></div>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <h1 id="pageTitle">Clinical Dashboard</h1>
+            <div class="topbar-right">
+                <i class="fa-regular fa-bell"></i>
+                <span>|</span>
+                <span>Today: <strong id="dateDisplay"></strong></span>
+            </div>
+        </header>
+
+        <div class="content">
+            <!-- PAGE: DIAGNOSIS -->
+            <div id="diagnosis" class="page-section active">
+                <div class="patient-bar">
+                    <div class="input-group"><label>Patient Name</label><input type="text" id="pName" placeholder="John Doe"></div>
+                    <div class="input-group"><label>Age</label><input type="number" id="pAge" placeholder="45"></div>
+                    <div class="input-group"><label>Heart Rate</label><input type="number" id="pHR" placeholder="80"></div>
+                    <div class="input-group"><label>BP</label><input type="text" id="pBP" placeholder="120/80"></div>
+                    <div class="input-group"><label>Symptoms</label><input type="text" id="pSymptoms" placeholder="Fever, cough..."></div>
+                </div>
+                <div class="main-grid">
+                    <div class="card">
+                        <div class="card-header"><i class="fa-solid fa-x-ray"></i> Diagnostic Imaging</div>
+                        <div class="card-body">
+                            <label class="upload-box">
+                                <input type="file" id="fileInput" accept="image/*" onchange="handleImageUpload(event)" style="display: none;">
+                                <div id="uploadPlaceholder"><i class="fa-solid fa-cloud-arrow-up"></i><p>Click to upload X-ray</p></div>
+                                <img id="imagePreview">
+                            </label>
+                            <div id="qualityCheckPanel" class="quality-alert hidden"><b>Quality Check:</b> <span id="qualityText"></span></div>
+                            <button class="btn-analyze hidden" id="analyzeBtn" onclick="runAnalysis()"><i class="fa-solid fa-microscope"></i> Run AI Analysis</button>
+                        </div>
+                    </div>
+                    <div class="card" id="emptyState">
+                        <div class="card-header"><i class="fa-solid fa-notes-medical"></i> AI Diagnostic Report</div>
+                        <div class="card-body" style="text-align: center; padding: 60px 20px;">
+                            <i class="fa-solid fa-folder-open" style="font-size: 40px; color: var(--border); margin-bottom: 15px;"></i>
+                            <p style="font-size: 14px; color: var(--text-muted);">Upload an X-ray to view AI analysis.</p>
+                        </div>
+                    </div>
+                    <div class="card hidden" id="resultCard">
+                        <div class="card-header"><i class="fa-solid fa-notes-medical"></i> AI Diagnostic Report</div>
+                        <div class="card-body" id="diagnosisContent"></div>
+                    </div>
+                </div>
+                <div id="bottomResults" class="bottom-grid hidden">
+                    <div class="card">
+                        <div class="card-header"><i class="fa-solid fa-chart-bar"></i> Class Probabilities</div>
+                        <div class="card-body" id="probContainer"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><i class="fa-solid fa-fire"></i> Grad-CAM Heatmap</div>
+                        <div class="card-body" style="padding: 10px;">
+                            <div class="gradcam-wrap"><img id="gradcamImage" src=""><div class="gradcam-overlay"></div></div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><i class="fa-solid fa-images"></i> Similar Patients</div>
+                        <div class="card-body">
+                            <div class="similar-row" id="similarContainer"></div>
+                            <button class="btn-analyze" style="background: var(--success);" onclick="generatePDF()"><i class="fa-solid fa-file-pdf"></i> Export PDF Report</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE: HISTORY -->
+            <div id="history" class="page-section">
+                <div class="card">
+                    <div class="card-header"><i class="fa-solid fa-database"></i> Patient Records</div>
+                    <table class="history-table">
+                        <thead><tr><th>Date</th><th>Patient Name</th><th>Age</th><th>Diagnosis</th><th>Confidence</th></tr></thead>
+                        <tbody id="historyBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PAGE: ANALYTICS -->
+            <div id="analytics" class="page-section">
+                <div class="analytics-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #eff6ff; color: var(--primary);"><i class="fa-solid fa-users"></i></div>
+                        <div class="stat-info"><h3 id="totalPatients">0</h3><p>Total Patients</p></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #fef2f2; color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="stat-info"><h3 id="criticalCases">0</h3><p>High Risk Cases</p></div>
+                    </div>
+                </div>
+                <div class="analytics-grid">
+                    <div class="chart-card">
+                        <div style="font-size:15px; font-weight:600; margin-bottom:10px;">Disease Distribution</div>
+                        <div class="chart-container"><canvas id="diseaseChart"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <div style="font-size:15px; font-weight:600; margin-bottom:10px;">Age Groups</div>
+                        <div class="chart-container"><canvas id="ageChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE: SETTINGS -->
+            <div id="settings" class="page-section">
+                <div class="settings-grid">
+                    <div class="settings-card">
+                        <h3><i class="fa-solid fa-user-doctor"></i> Doctor Profile</h3>
+                        <div class="form-group"><label>Doctor Name</label><input type="text" id="setName"></div>
+                        <div class="form-group"><label>Hospital</label><input type="text" id="setHospital"></div>
+                        <div class="form-group"><label>Department</label><input type="text" id="setDept"></div>
+                        <button class="btn-save" onclick="saveSettings()">Save Profile</button>
+                    </div>
+                    <div class="settings-card">
+                        <h3><i class="fa-solid fa-sliders"></i> Preferences</h3>
+                        <div class="toggle-row">
+                            <div><strong>Email Alerts</strong><p style="font-size:12px; color:var(--text-muted);">High-risk notifications</p></div>
+                            <label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        </div>
+                        <div class="toggle-row">
+                            <div><strong>Auto-Save</strong><p style="font-size:12px; color:var(--text-muted);">Save PDFs automatically</p></div>
+                            <label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        </div>
+                        <div class="toggle-row" style="margin-top:20px;">
+                            <button class="btn-save" style="background:var(--danger);" onclick="logout()">Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="chat-toggle" onclick="document.getElementById('chatPanel').classList.toggle('active')"><i class="fa-solid fa-comment-dots"></i></div>
+    <div class="chat-panel" id="chatPanel">
+        <div class="chat-top"><h4><i class="fa-solid fa-robot"></i> EMR Assistant</h4><i class="fa-solid fa-xmark" style="cursor:pointer;" onclick="document.getElementById('chatPanel').classList.remove('active')"></i></div>
+        <div class="chat-msgs" id="chatMsgs"><div class="msg bot">Hello Dr. Komal. How can I assist you?</div></div>
+        <div class="chat-input-wrap">
+            <input type="text" id="chatInput" placeholder="Type..." onkeypress="if(event.key==='Enter') sendMsg()">
+            <button class="chat-send" onclick="sendMsg()"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('dateDisplay').innerText = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+        function showPage(pageId, el) {
+            document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            el.classList.add('active');
+            
+            const titles = { diagnosis: "Clinical Dashboard", history: "Patient Records", analytics: "Hospital Analytics", settings: "Settings" };
+            document.getElementById('pageTitle').innerText = titles[pageId];
+
+            if (pageId === 'history') loadHistory();
+            if (pageId === 'analytics') loadAnalytics();
+            if (pageId === 'settings') {
+                document.getElementById('setName').value = localStorage.getItem('docName') || "Dr. Komal";
+                document.getElementById('setHospital').value = localStorage.getItem('hospital') || "MedVision AI Hospital";
+                document.getElementById('setDept').value = localStorage.getItem('dept') || "Radiology";
+            }
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('imagePreview').src = e.target.result;
+                    document.getElementById('imagePreview').style.display = 'block';
+                    document.getElementById('uploadPlaceholder').style.display = 'none';
+                    document.getElementById('analyzeBtn').classList.remove('hidden');
+                    document.getElementById('qualityCheckPanel').classList.remove('hidden');
+                    document.getElementById('qualityText').innerText = "Processing...";
+                    setTimeout(() => { document.getElementById('qualityText').innerText = "Acceptable (Sharp, Good Contrast)."; }, 1000);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function runAnalysis() {
+            document.getElementById('analyzeBtn').classList.add('hidden');
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('resultCard').classList.remove('hidden');
+            document.getElementById('bottomResults').classList.remove('hidden');
+            const formData = new FormData();
+            formData.append("file", document.getElementById('fileInput').files[0]);
+            formData.append("patient_name", document.getElementById('pName').value || "Unknown");
+            formData.append("age", document.getElementById('pAge').value || 0);
+            formData.append("symptoms", document.getElementById('pSymptoms').value || "");
+            try {
+                const res = await fetch("http://localhost:8001/predict/diagnosis", { method: "POST", body: formData });
+                const data = await res.json();
+                document.getElementById('gradcamImage').src = document.getElementById('imagePreview').src;
+                const riskColor = data.risk === 'HIGH' ? 'var(--danger)' : 'var(--success)';
+                document.getElementById('diagnosisContent').innerHTML = `
+                    <div class="diagnosis-title" style="color: ${riskColor};">${data.diagnosis}</div>
+                    <span class="risk-tag" style="background: ${riskColor};">${data.risk} RISK</span>
+                    <div class="confidence-box">
+                        <div class="conf-item"><p>Confidence</p><h3>${data.confidence}%</h3></div>
+                        <div class="conf-item"><p>Uncertainty</p><h3>${data.uncertainty || 2.5}%</h3></div>
+                    </div>
+                    <div class="rec-box"><strong>Recommendation:</strong><br>${data.recommendation}</div>
+                `;
+                document.getElementById('probContainer').innerHTML = `
+                    <div class="prob-row"><div class="prob-label">COVID-19</div><div class="prob-track"><div class="prob-fill" style="width: ${data.probabilities?.COVID19 || 5}%; background: #f59e0b;"></div></div><div class="prob-value">${data.probabilities?.COVID19 || 5}%</div></div>
+                    <div class="prob-row"><div class="prob-label">Normal</div><div class="prob-track"><div class="prob-fill" style="width: ${data.probabilities?.NORMAL || 10}%; background: #10b981;"></div></div><div class="prob-value">${data.probabilities?.NORMAL || 10}%</div></div>
+                    <div class="prob-row"><div class="prob-label">Pneumonia</div><div class="prob-track"><div class="prob-fill" style="width: ${data.probabilities?.PNEUMONIA || 80}%; background: #ef4444;"></div></div><div class="prob-value">${data.probabilities?.PNEUMONIA || 80}%</div></div>
+                    <div class="prob-row"><div class="prob-label">Tuberculosis</div><div class="prob-track"><div class="prob-fill" style="width: ${data.probabilities?.TUBERCULOSIS || 5}%; background: #a855f7;"></div></div><div class="prob-value">${data.probabilities?.TUBERCULOSIS || 5}%</div></div>
+                `;
+                document.getElementById('similarContainer').innerHTML = `
+                    <div class="similar-item"><img src="${document.getElementById('imagePreview').src}"><p>95%</p></div>
+                    <div class="similar-item"><img src="${document.getElementById('imagePreview').src}"><p>91%</p></div>
+                    <div class="similar-item"><img src="${document.getElementById('imagePreview').src}"><p>88%</p></div>
+                `;
+            } catch (err) { alert("Backend connection failed."); document.getElementById('analyzeBtn').classList.remove('hidden'); }
+        }
+
+        async function loadHistory() {
+            const tbody = document.getElementById('historyBody');
+            tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Loading...</td></tr>";
+            try {
+                const res = await fetch("http://localhost:8001/patients/history");
+                const history = await res.json();
+                tbody.innerHTML = "";
+                if (history.length === 0) { tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>No records found.</td></tr>"; return; }
+                history.forEach(r => {
+                    tbody.innerHTML += `<tr><td>${r.date}</td><td>${r.name}</td><td>${r.age}</td><td><strong>${r.diagnosis}</strong></td><td>${r.confidence}%</td></tr>`;
+                });
+            } catch (err) { tbody.innerHTML = "<tr><td colspan='5' style='text-align:center; color: var(--danger);'>Failed to load.</td></tr>"; }
+        }
+
+        let chart1 = null, chart2 = null;
+        async function loadAnalytics() {
+            document.getElementById('totalPatients').innerText = "0";
+            document.getElementById('criticalCases').innerText = "0";
+            try {
+                const res = await fetch("http://localhost:8001/patients/history");
+                const history = await res.json();
+                document.getElementById('totalPatients').innerText = history.length;
+                const highRisk = history.filter(h => h.confidence > 80 && h.diagnosis !== 'NORMAL').length;
+                document.getElementById('criticalCases').innerText = highRisk;
+
+                const counts = { COVID19: 0, NORMAL: 0, PNEUMONIA: 0, TUBERCULOSIS: 0 };
+                history.forEach(h => { if (counts[h.diagnosis] !== undefined) counts[h.diagnosis]++; });
+
+                if (chart1) chart1.destroy();
+                chart1 = new Chart(document.getElementById('diseaseChart').getContext('2d'), {
+                    type: 'doughnut',
+                    data: { labels: ['COVID-19', 'Normal', 'Pneumonia', 'Tuberculosis'], datasets: [{ data: [counts.COVID19, counts.NORMAL, counts.PNEUMONIA, counts.TUBERCULOSIS], backgroundColor: ['#f59e0b', '#10b981', '#ef4444', '#a855f7'], borderWidth: 0 }] },
+                    options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } } }
+                });
+
+                let ageGroups = { "0-18": 0, "19-35": 0, "36-50": 0, "50+": 0 };
+                history.forEach(h => {
+                    const age = parseInt(h.age);
+                    if (age <= 18) ageGroups["0-18"]++;
+                    else if (age <= 35) ageGroups["19-35"]++;
+                    else if (age <= 50) ageGroups["36-50"]++;
+                    else ageGroups["50+"]++;
+                });
+
+                if (chart2) chart2.destroy();
+                chart2 = new Chart(document.getElementById('ageChart').getContext('2d'), {
+                    type: 'bar',
+                    data: { labels: Object.keys(ageGroups), datasets: [{ label: 'Patients', data: Object.values(ageGroups), backgroundColor: '#2563eb', borderRadius: 4 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                });
+            } catch (err) { console.error(err); }
+        }
+
+        function saveSettings() {
+            localStorage.setItem('docName', document.getElementById('setName').value);
+            localStorage.setItem('hospital', document.getElementById('setHospital').value);
+            localStorage.setItem('dept', document.getElementById('setDept').value);
+            alert("Settings Saved!");
+        }
+
+        function logout() {
+            localStorage.removeItem('doctorId');
+            window.location.href = 'index.html';
+        }
+
+        function generatePDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    const pName = document.getElementById('pName').value || "N/A";
+    const pAge = document.getElementById('pAge').value || "N/A";
+    const pHR = document.getElementById('pHR').value || "N/A";
+    const pBP = document.getElementById('pBP').value || "N/A";
+    const symptoms = document.getElementById('pSymptoms').value || "N/A";
+    
+    // Screen se real diagnosis uthao
+    const diagnosisEl = document.querySelector('.diagnosis-title');
+    const diagnosis = diagnosisEl ? diagnosisEl.innerText : "N/A";
+    
+    const confEls = document.querySelectorAll('.conf-item h3');
+    const confidence = confEls[0] ? confEls[0].innerText : "N/A";
+    const uncertainty = confEls[1] ? confEls[1].innerText : "N/A";
+    
+    const recEl = document.querySelector('.rec-box');
+    const recommendation = recEl ? recEl.innerText.replace("Recommendation:", "").trim() : "N/A";
+    
+    // Header
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.setTextColor(37, 99, 235);
+    doc.text("MedVision EMR Hospital", 105, 20, null, null, "center");
+    
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.setFont("helvetica", "normal");
+    doc.text("Department of Radiology & AI Diagnostics", 105, 27, null, null, "center");
+    
+    doc.setLineWidth(0.5);
+    doc.setDrawColor(200);
+    doc.line(20, 32, 190, 32);
+    
+    // Patient Info
+    doc.setFontSize(14);
+    doc.setTextColor(0);
+    doc.setFont("helvetica", "bold");
+    doc.text("Patient Information", 20, 45);
+    
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Name: ${pName}`, 20, 55);
+    doc.text(`Age: ${pAge}`, 20, 62);
+    doc.text(`Heart Rate: ${pHR} bpm`, 20, 69);
+    doc.text(`Blood Pressure: ${pBP}`, 20, 76);
+    doc.text(`Symptoms: ${symptoms}`, 20, 83);
+    
+    // Diagnosis
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("AI Diagnosis Results", 20, 100);
+    
+    doc.setFontSize(16);
+    doc.setTextColor(220, 38, 38);
+    doc.text(`Diagnosis: ${diagnosis}`, 20, 112);
+    
+    doc.setFontSize(11);
+    doc.setTextColor(0);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Confidence: ${confidence}`, 20, 122);
+    doc.text(`Uncertainty: ${uncertainty}`, 20, 130);
+    
+    // Recommendation
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("AI Recommendation", 20, 148);
+    
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    const splitRec = doc.splitTextToSize(recommendation, 170);
+    doc.text(splitRec, 20, 158);
+    
+    // Footer
+    doc.setFontSize(9);
+    doc.setTextColor(150);
+    doc.text("This is an AI-generated report. Please consult a senior doctor for final confirmation.", 105, 280, null, null, "center");
+    doc.text(`Generated: ${new Date().toLocaleString()}`, 105, 287, null, null, "center");
+    
+    doc.save(`MedVision_Report_${pName}.pdf`);
+}
+
+
+        function sendMsg() {
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
+            if (!msg) return;
+            const box = document.getElementById('chatMsgs');
+            box.innerHTML += `<div class="msg user">${msg}</div>`;
+            input.value = '';
+            box.scrollTop = box.scrollHeight;
+            setTimeout(() => {
+                let reply = "Please consult a senior doctor.";
+                const m = msg.toLowerCase();
+                if (m.includes("pneumonia")) reply = "Pneumonia is a lung infection treated with antibiotics.";
+                else if (m.includes("fever") || m.includes("cough")) reply = "Common symptoms. Check the X-ray report.";
+                else if (m.includes("hello") || m.includes("hi")) reply = "Hello Doctor. How can I assist?";
+                box.innerHTML += `<div class="msg bot">${reply}</div>`;
+                box.scrollTop = box.scrollHeight;
+            }, 800);
+        }
+    </script>
+</body>
+</html>

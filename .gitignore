@@ -31,3 +31,5 @@ results/
 .idea/
 .DS_Store
 Thumbs.db
+medvision.db
+results/
