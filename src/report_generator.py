@@ -153,8 +153,8 @@ def generate_pdf_report(
                     ))
                     continue
                 try:
-                    with ImageReader(str(path)) as reader:
-                        width, height = reader.getSize()
+                    reader = ImageReader(str(path))
+                    width, height = reader.getSize()
                     scale = min(220 / width, 145 / height)
                     score = float(match["similarity_score"])
                     label = escape(str(match["dataset_class"]))
