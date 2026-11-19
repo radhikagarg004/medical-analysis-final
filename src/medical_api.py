@@ -433,6 +433,8 @@ async def generate_report(file: UploadFile = File(...)):
             output_path=gradcam_path
         )
 
+        similar_images = find_similar_images(temp_path, top_k=5)
+
         pdf_buffer = generate_pdf_report(
             filename=file.filename or "chest_xray.jpg",
             prediction=prediction,
@@ -440,7 +442,8 @@ async def generate_report(file: UploadFile = File(...)):
             quality=quality,
             review_required=review_required,
             threshold=UNCERTAINTY_THRESHOLD,
-            gradcam_path=gradcam_path
+            gradcam_path=gradcam_path,
+            similar_images=similar_images
         )
 
         return StreamingResponse(
