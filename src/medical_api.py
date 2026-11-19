@@ -1,10 +1,13 @@
-
+from fastapi.responses import StreamingResponse
+from src.report_generator import generate_pdf_report
+from PIL import Image
 
 
 
 from src.similarity import find_similar_images
 from src.uncertainty import estimate_uncertainty
-UNCERTAINTY_THRESHOLD = 5.0
+UNCERTAINTY_THRESHOLD = 2.0
+
 
 from src.image_quality import check_image_quality
 from fastapi import FastAPI, UploadFile, File, HTTPException
@@ -353,6 +356,114 @@ async def uncertainty_endpoint(file: UploadFile = File(...)):
         if temp_path and os.path.exists(temp_path):
             os.remove(temp_path)
 
+
+@app.post(
+    "/generate-report",
+    response_class=StreamingResponse,
+    responses={
+        200: {
+            "content": {"application/pdf": {}},
+            "description": "Downloadable PDF analysis report"
+        }
+    }
+)
+async def generate_report(file: UploadFile = File(...)):
+
+    if file.content_type not in ["image/jpeg", "image/png"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Please upload a JPG or PNG image."
+        )
+
+    content = await file.read()
+
+    if not content:
+        raise HTTPException(
+            status_code=400,
+            detail="Uploaded image is empty."
+        )
+
+    if len(content) > 10 * 1024 * 1024:
+        raise HTTPException(
+            status_code=413,
+            detail="Image must be smaller than 10 MB."
+        )
+
+    temp_path = None
+    gradcam_path = None
+
+    try:
+        suffix = Path(file.filename or "image.jpg").suffix.lower()
+
+        with tempfile.NamedTemporaryFile(
+            suffix=suffix,
+            delete=False
+        ) as temp:
+            temp.write(content)
+            temp_path = temp.name
+
+        # Verify that the uploaded file is a readable image
+        with Image.open(temp_path) as img:
+            img.verify()
+
+        # Existing project features
+        quality = check_image_quality(temp_path)
+        prediction = predict_image(temp_path)
+
+        uncertainty = estimate_uncertainty(
+            temp_path,
+            num_passes=20
+        )
+
+        review_required = (
+            quality["quality_status"] == "Needs Review"
+            or uncertainty["uncertainty_score"]
+            >= UNCERTAINTY_THRESHOLD
+        )
+
+        # Use a unique temporary Grad-CAM file
+        with tempfile.NamedTemporaryFile(
+            suffix=".png",
+            delete=False
+        ) as temp_cam:
+            gradcam_path = temp_cam.name
+
+        generate_gradcam(
+            temp_path,
+            output_path=gradcam_path
+        )
+
+        pdf_buffer = generate_pdf_report(
+            filename=file.filename or "chest_xray.jpg",
+            prediction=prediction,
+            uncertainty=uncertainty,
+            quality=quality,
+            review_required=review_required,
+            threshold=UNCERTAINTY_THRESHOLD,
+            gradcam_path=gradcam_path
+        )
+
+        return StreamingResponse(
+            pdf_buffer,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition":
+                'attachment; filename="medical_analysis_report.pdf"'
+            }
+        )
+
+    except (ValueError, OSError) as exc:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid or unreadable image."
+        ) from exc
+
+    finally:
+        if temp_path and os.path.exists(temp_path):
+            os.remove(temp_path)
+
+        if gradcam_path and os.path.exists(gradcam_path):
+            os.remove(gradcam_path)
 
 
 
