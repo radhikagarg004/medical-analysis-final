@@ -6,7 +6,7 @@ from xml.sax.saxutils import escape
 
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer,
-    Table, TableStyle, Image
+    Table, TableStyle, Image, KeepTogether
 )
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
@@ -20,7 +20,8 @@ def generate_pdf_report(
     quality,
     review_required,
     threshold=2.0,
-    gradcam_path=None
+    gradcam_path=None,
+    similar_images=None
 ):
     buffer = BytesIO()
 
@@ -124,34 +125,77 @@ def generate_pdf_report(
     elements.append(Spacer(1, 15))
 
     if gradcam_path and Path(gradcam_path).exists():
-        add_heading("5. Grad-CAM Visualization")
-
         image_reader = ImageReader(str(gradcam_path))
         width, height = image_reader.getSize()
-
-        max_width = 330
-        max_height = 230
-        scale = min(
-            max_width / width,
-            max_height / height
-        )
-
-        elements.append(
-            Image(
-                str(gradcam_path),
-                width=width * scale,
-                height=height * scale
-            )
-        )
-
-        elements.append(Spacer(1, 10))
-        elements.append(
+        scale = min(330 / width, 230 / height)
+        elements.append(KeepTogether([
+            Paragraph("5. Grad-CAM Visualization", styles["Heading2"]),
+            Spacer(1, 8),
+            Image(str(gradcam_path), width=width * scale, height=height * scale),
+            Spacer(1, 10),
             Paragraph(
-                "Highlighted regions show areas influencing "
-                "the model prediction, not confirmed lesions.",
-                styles["Normal"]
-            )
-        )
+                "Highlighted regions show areas influencing the model prediction, "
+                "not confirmed lesions.", styles["Normal"]
+            ),
+        ]))
+
+    add_heading("6. Similar Image Retrieval - Top 5 Matches")
+    if similar_images:
+        # Use a two-column layout so all five actual X-rays are readable.
+        for offset in range(0, min(5, len(similar_images)), 2):
+            cells = []
+            for match in similar_images[offset:offset + 2]:
+                path = Path(match["image_path"])
+                if not path.is_file():
+                    cells.append(Paragraph(
+                        "Reference image unavailable: " + escape(path.name),
+                        styles["Normal"]
+                    ))
+                    continue
+                try:
+                    with ImageReader(str(path)) as reader:
+                        width, height = reader.getSize()
+                    scale = min(220 / width, 145 / height)
+                    score = float(match["similarity_score"])
+                    label = escape(str(match["dataset_class"]))
+                    rank = int(match["rank"])
+                    cells.append(KeepTogether([
+                        Image(str(path), width=width * scale, height=height * scale),
+                        Spacer(1, 5),
+                        Paragraph(
+                            f"Match {rank} | Reference class: {label}",
+                            styles["Normal"]
+                        ),
+                        Paragraph(
+                            f"Cosine similarity: {score:.4f}",
+                            styles["Normal"]
+                        )
+                    ]))
+                except (OSError, ValueError):
+                    cells.append(Paragraph(
+                        "Unable to display reference image: " + escape(path.name),
+                        styles["Normal"]
+                    ))
+            while len(cells) < 2:
+                cells.append("")
+            row = Table([cells], colWidths=[250, 250], hAlign="LEFT")
+            row.setStyle(TableStyle([
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 4),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 15),
+            ]))
+            elements.append(row)
+        elements.append(Paragraph(
+            "These are visually similar training references, not diagnostic "
+            "confirmation. Similarity scores are not disease probabilities.",
+            styles["Normal"]
+        ))
+    else:
+        elements.append(Paragraph(
+            "No similar reference images were available.",
+            styles["Normal"]
+        ))
 
     elements.append(Spacer(1, 20))
 
