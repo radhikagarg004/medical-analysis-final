@@ -159,7 +159,9 @@ def generate_pdf_report(
                     score = float(match["similarity_score"])
                     label = escape(str(match["dataset_class"]))
                     rank = int(match["rank"])
-                    cells.append(KeepTogether([
+                    # Table cells accept lists of flowables. KeepTogether
+                    # inside a table cell reports an enormous artificial height.
+                    cells.append([
                         Image(str(path), width=width * scale, height=height * scale),
                         Spacer(1, 5),
                         Paragraph(
@@ -170,7 +172,7 @@ def generate_pdf_report(
                             f"Cosine similarity: {score:.4f}",
                             styles["Normal"]
                         )
-                    ]))
+                    ])
                 except (OSError, ValueError):
                     cells.append(Paragraph(
                         "Unable to display reference image: " + escape(path.name),
