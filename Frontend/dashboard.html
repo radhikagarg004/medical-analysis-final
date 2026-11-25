@@ -1,540 +1,358 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedVision AI | Clinical EMR</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MedVision AI | Clinical Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+:root{
+  --bg:#0f172a;--card:#1e293b;--card2:#334155;--border:#334155;
+  --text:#f1f5f9;--soft:#94a3b8;--dim:#64748b;
+  --primary:#38bdf8;--primary2:#818cf8;
+  --success:#34d399;--warning:#fbbf24;--danger:#f87171;
+}
+body{background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:13px}
 
-    <style>
-        :root {
-            --primary: #2563eb; --bg: #f8fafc; --sidebar: #0f172a;
-            --text-main: #1e293b; --text-muted: #64748b; --border: #e2e8f0;
-            --card: #ffffff; --danger: #dc2626; --success: #059669;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+/* SIDEBAR */
+.sidebar{width:64px;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:6px;position:sticky;top:0;height:100vh}
+.logo{width:40px;height:40px;background:linear-gradient(135deg,var(--primary),var(--primary2));border-radius:10px;display:flex;align-items:center;justify-content:center;color:white;font-size:18px;margin-bottom:16px}
+.nav-btn{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--soft);font-size:16px;cursor:pointer;border:none;background:transparent;transition:.15s}
+.nav-btn:hover{background:var(--card2);color:var(--text)}
+.nav-btn.active{background:rgba(56,189,248,.15);color:var(--primary)}
 
-        /* SIDEBAR */
-        .sidebar { width: 250px; background: var(--sidebar); display: flex; flex-direction: column; }
-        .brand { font-size: 18px; font-weight: 700; color: white; padding: 24px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .brand i { color: var(--primary); }
-        .nav { flex: 1; padding: 20px 0; }
-        .nav-item { padding: 14px 24px; color: #94a3b8; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.2s; border-left: 3px solid transparent; }
-        .nav-item:hover { background: rgba(255,255,255,0.05); color: white; }
-        .nav-item.active { background: rgba(37,99,235,0.1); color: var(--primary); border-left-color: var(--primary); }
-        .nav-footer { padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 12px; }
-        .avatar { width: 36px; height: 36px; background: var(--primary); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: 600; font-size: 14px; }
-        .nav-footer-info h4 { font-size: 13px; color: white; }
-        .nav-footer-info p { font-size: 11px; color: #94a3b8; }
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
 
-        /* MAIN */
-        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .topbar { height: 60px; background: white; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 24px; }
-        .topbar h1 { font-size: 18px; font-weight: 600; }
-        .content { flex: 1; padding: 24px; overflow-y: auto; }
-        .page-section { display: none; }
-        .page-section.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+/* TOPBAR */
+.topbar{padding:14px 24px;background:var(--card);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.page-title{font-size:16px;font-weight:700}
+.page-sub{font-size:11.5px;color:var(--soft);margin-top:2px}
+.user-chip{display:flex;align-items:center;gap:10px;padding:6px 12px;background:var(--card2);border-radius:999px;font-size:12px}
+.user-avatar{width:26px;height:26px;background:linear-gradient(135deg,var(--primary),var(--primary2));border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:11px}
 
-        /* PATIENT BAR */
-        .patient-bar { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 24px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 2fr; gap: 20px; align-items: end; }
-        .input-group { display: flex; flex-direction: column; gap: 5px; }
-        .input-group label { font-size: 12px; font-weight: 500; color: var(--text-muted); }
-        .input-group input { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; outline: none; }
-        .input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37,99,235,0.1); }
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:20px 24px}
+.view{display:none}
+.view.active{display:block}
 
-        /* MAIN GRID */
-        .main-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; margin-bottom: 24px; }
-        .card { background: white; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-        .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; background: #f8fafc; }
-        .card-header i { color: var(--primary); }
-        .card-body { padding: 20px; }
+/* DASHBOARD GRID */
+.dash-grid{display:grid;grid-template-columns:340px 1fr 360px;gap:16px}
+@media(max-width:1400px){.dash-grid{grid-template-columns:300px 1fr 320px}}
+@media(max-width:1100px){.dash-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:800px){.dash-grid{grid-template-columns:1fr}}
 
-        /* UPLOAD */
-        .upload-box { border: 2px dashed var(--border); border-radius: 8px; padding: 30px; text-align: center; cursor: pointer; transition: 0.2s; display: block; }
-        .upload-box:hover { border-color: var(--primary); background: #eff6ff; }
-        .upload-box i { font-size: 32px; color: var(--text-muted); margin-bottom: 10px; }
-        .upload-box p { font-size: 13px; color: var(--text-muted); font-weight: 500; }
-        #imagePreview { max-width: 100%; max-height: 300px; border-radius: 8px; display: none; margin: 0 auto; }
-        .quality-alert { margin-top: 15px; padding: 10px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; font-size: 12px; color: #166534; }
-        .btn-analyze { margin-top: 15px; width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; }
-        .btn-analyze:hover { background: #1d4ed8; }
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.card-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:8px}
+.card-title i{color:var(--primary)}
+.card-badge{font-size:10px;padding:3px 8px;border-radius:4px;background:var(--card2);color:var(--soft);font-weight:600;text-transform:uppercase}
 
-        /* RESULT */
-        .diagnosis-title { font-size: 24px; font-weight: 700; color: var(--danger); margin-bottom: 5px; }
-        .risk-tag { display: inline-block; padding: 4px 10px; background: var(--danger); color: white; font-size: 11px; font-weight: 700; border-radius: 4px; }
-        .confidence-box { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
-        .conf-item { background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid var(--border); }
-        .conf-item p { font-size: 12px; color: var(--text-muted); font-weight: 500; margin-bottom: 4px; }
-        .conf-item h3 { font-size: 22px; font-weight: 700; }
-        .rec-box { background: #eff6ff; border-left: 4px solid var(--primary); padding: 15px; border-radius: 0 6px 6px 0; font-size: 13px; color: var(--text-main); }
+/* FORMS */
+.form-row{display:flex;gap:10px;margin-bottom:10px}
+.form-group{flex:1}
+.form-group label{display:block;font-size:11px;color:var(--soft);margin-bottom:6px;font-weight:500}
+.form-group input,.form-group textarea{width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12.5px;outline:none;font-family:inherit}
+.form-group input:focus,.form-group textarea:focus{border-color:var(--primary)}
+.form-group textarea{resize:vertical;height:50px}
 
-        /* BOTTOM GRID */
-        .bottom-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
-        .prob-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
-        .prob-label { width: 100px; font-size: 12px; font-weight: 600; }
-        .prob-track { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
-        .prob-fill { height: 100%; border-radius: 4px; }
-        .prob-value { width: 40px; text-align: right; font-size: 12px; font-weight: 700; }
-        .gradcam-wrap { position: relative; border-radius: 6px; overflow: hidden; }
-        .gradcam-wrap img { width: 100%; display: block; }
-        .gradcam-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 40% 60%, rgba(239, 68, 68, 0.6) 0%, rgba(245, 158, 11, 0.3) 30%, transparent 60%); mix-blend-mode: multiply; }
-        .similar-row { display: flex; gap: 10px; margin-top: 15px; }
-        .similar-item { flex: 1; text-align: center; font-size: 11px; font-weight: 700; }
-        .similar-item img { width: 100%; height: 70px; object-fit: cover; border-radius: 6px; margin-bottom: 5px; border: 2px solid var(--border); }
+/* UPLOAD */
+.upload-zone{border:2px dashed var(--border);border-radius:10px;padding:24px 16px;text-align:center;cursor:pointer;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:140px;background:var(--bg);transition:.15s}
+.upload-zone:hover{border-color:var(--primary);background:rgba(56,189,248,.04)}
+.upload-zone i{font-size:28px;color:var(--primary);margin-bottom:8px}
+.upload-zone p{font-size:12px;color:var(--soft)}
+.upload-zone .hint{font-size:10px;color:var(--dim);margin-top:4px}
+#imagePreview{max-width:100%;max-height:180px;border-radius:8px;display:none}
 
-        /* TABLES */
-        .history-table { width: 100%; border-collapse: collapse; }
-        .history-table th, .history-table td { padding: 14px 20px; text-align: left; border-bottom: 1px solid var(--border); font-size: 14px; }
-        .history-table th { background: #f8fafc; color: var(--text-muted); font-size: 12px; font-weight: 600; text-transform: uppercase; }
-        .history-table tr:hover { background: #f8fafc; }
+/* BUTTONS */
+.btn{width:100%;padding:10px 14px;border-radius:8px;border:none;font-weight:600;font-size:12.5px;cursor:pointer;display:flex;justify-content:center;align-items:center;gap:8px;transition:.15s;font-family:inherit}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary2));color:white}
+.btn-primary:hover:not(:disabled){opacity:.9}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-success{background:var(--success);color:#064e3b}
+.hidden{display:none!important}
 
-        /* ANALYTICS */
-        .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
-        .stat-card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 24px; display: flex; align-items: center; gap: 20px; }
-        .stat-icon { width: 60px; height: 60px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 24px; }
-        .stat-info h3 { font-size: 28px; font-weight: 700; color: var(--text-main); }
-        .stat-info p { font-size: 13px; color: var(--text-muted); font-weight: 500; }
-        .chart-card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 20px; }
-        .chart-container { height: 300px; position: relative; margin-top: 15px; }
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:40px 16px;color:var(--dim)}
+.empty-state i{font-size:32px;margin-bottom:10px;display:block;opacity:.5}
+.empty-state h4{font-size:13px;color:var(--soft);margin-bottom:4px}
+.empty-state p{font-size:11.5px}
 
-        /* SETTINGS */
-        .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-        .settings-card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 24px; }
-        .settings-card h3 { font-size: 16px; margin-bottom: 20px; color: var(--text-main); border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { font-size: 13px; font-weight: 600; color: var(--text-main); display: block; margin-bottom: 6px; }
-        .form-group input { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; outline: none; }
-        .toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
-        .toggle-row:last-child { border-bottom: none; }
-        .toggle-switch { position: relative; width: 44px; height: 24px; }
-        .toggle-switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 24px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--primary); }
-        input:checked + .slider:before { transform: translateX(20px); }
-        .btn-save { background: var(--primary); color: white; padding: 12px 24px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 15px; }
+/* LOADING */
+.loading{text-align:center;padding:40px 16px}
+.spinner{width:36px;height:36px;border:3px solid var(--card2);border-top-color:var(--primary);border-radius:50%;margin:0 auto 12px;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading h4{font-size:13px;margin-bottom:4px}
+.loading p{font-size:11.5px;color:var(--soft)}
 
-        /* CHATBOT */
-        .chat-toggle { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; background: var(--primary); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 22px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; }
-        .chat-panel { position: fixed; bottom: 90px; right: 24px; width: 320px; height: 420px; background: white; border: 1px solid var(--border); border-radius: 12px; display: none; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 100; }
-        .chat-panel.active { display: flex; }
-        .chat-top { background: var(--sidebar); color: white; padding: 15px; display: flex; justify-content: space-between; border-radius: 12px 12px 0 0; }
-        .chat-top h4 { font-size: 14px; }
-        .chat-msgs { flex: 1; padding: 15px; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 10px 14px; border-radius: 8px; font-size: 13px; max-width: 85%; line-height: 1.4; }
-        .msg.bot { background: white; border: 1px solid var(--border); align-self: flex-start; }
-        .msg.user { background: var(--primary); color: white; align-self: flex-end; }
-        .chat-input-wrap { padding: 12px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
-        .chat-input-wrap input { flex: 1; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; outline: none; font-size: 13px; }
-        .chat-send { background: var(--primary); border: none; width: 36px; border-radius: 6px; color: white; cursor: pointer; }
-        .hidden { display: none !important; }
-    </style>
+/* RESULT BANNER */
+.result-banner{padding:14px;border-radius:10px;margin-bottom:12px;position:relative}
+.result-banner.risk-high{background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.3)}
+.result-banner.risk-moderate{background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3)}
+.result-banner.risk-low{background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3)}
+.result-banner .label{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--soft);font-weight:600;margin-bottom:4px}
+.result-banner .value{font-size:22px;font-weight:800}
+.result-banner.risk-high .value{color:var(--danger)}
+.result-banner.risk-moderate .value{color:var(--warning)}
+.result-banner.risk-low .value{color:var(--success)}
+.review-tag{position:absolute;top:14px;right:14px;font-size:10px;padding:4px 10px;border-radius:5px;font-weight:700}
+.review-tag.flag{background:var(--danger);color:white}
+.review-tag.ok{background:var(--success);color:#064e3b}
+
+/* STATS */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.stat{background:var(--card2);border-radius:8px;padding:10px;text-align:center}
+.stat .lbl{font-size:10px;color:var(--soft);text-transform:uppercase;font-weight:600;margin-bottom:4px}
+.stat .val{font-size:16px;font-weight:800;color:var(--primary)}
+.stat.warn .val{color:var(--warning)}
+.stat.ok .val{color:var(--success)}
+
+/* RECOMMENDATION */
+.recommendation{padding:10px 12px;background:rgba(56,189,248,.08);border-left:3px solid var(--primary);border-radius:6px;font-size:12px;line-height:1.5;margin-bottom:12px}
+.recommendation b{color:var(--primary)}
+
+/* PROBABILITY BARS */
+.prob-row{margin-bottom:10px}
+.prob-head{display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:4px}
+.prob-head .name{font-weight:600}
+.prob-head .pct{color:var(--soft);font-weight:700}
+.prob-row.winner .prob-head .name,.prob-row.winner .prob-head .pct{color:var(--primary)}
+.prob-track{height:6px;background:var(--card2);border-radius:999px;overflow:hidden}
+.prob-fill{height:100%;border-radius:999px;transition:width .8s ease}
+
+/* GAUGE */
+.gauge-row{display:flex;align-items:center;gap:16px}
+.gauge{position:relative;width:80px;height:80px;flex-shrink:0}
+.gauge svg{transform:rotate(-90deg)}
+.gauge-text{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center}
+.gauge-text .num{font-size:18px;font-weight:800}
+.gauge-text .sub{font-size:8px;color:var(--soft);text-transform:uppercase;font-weight:600}
+.gauge-info{flex:1}
+.gauge-info h4{font-size:12.5px;margin-bottom:4px}
+.gauge-info p{font-size:11px;color:var(--soft);line-height:1.4}
+.verdict{display:inline-block;margin-top:6px;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;text-transform:uppercase}
+.verdict.low{background:rgba(52,211,153,.15);color:var(--success)}
+.verdict.med{background:rgba(251,191,36,.15);color:var(--warning)}
+.verdict.high{background:rgba(248,113,113,.15);color:var(--danger)}
+
+/* GRADCAM */
+.gradcam-img{width:100%;border-radius:8px;display:block;aspect-ratio:4/3;object-fit:cover;background:var(--bg)}
+.gradcam-legend{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:var(--soft);margin-top:8px;font-weight:600}
+.legend-bar{flex:1;height:5px;border-radius:999px;background:linear-gradient(90deg,rgba(96,165,250,.4),rgba(251,191,36,.7),rgba(248,113,113,.9));margin:0 8px}
+
+/* SIMILAR IMAGES */
+.similar-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.similar-item{position:relative;border-radius:6px;overflow:hidden;background:var(--bg);aspect-ratio:1}
+.similar-item img{width:100%;height:100%;object-fit:cover;display:block}
+.similar-item .match{position:absolute;bottom:3px;right:3px;background:rgba(0,0,0,.75);color:white;font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px}
+
+/* CHART */
+.chart-wrap{height:140px;position:relative;margin-top:8px}
+.slider-wrap{margin-top:10px}
+.slider-label{display:flex;justify-content:space-between;font-size:10.5px;color:var(--soft);font-weight:600;margin-bottom:4px}
+input[type=range]{width:100%;accent-color:var(--primary)}
+
+/* NOT AVAILABLE */
+.not-avail{text-align:center;padding:24px 16px;color:var(--dim);font-size:11.5px;line-height:1.5}
+.not-avail i{display:block;font-size:24px;margin-bottom:8px;opacity:.5}
+
+/* TABLES */
+.table{width:100%;border-collapse:collapse;font-size:12.5px}
+.table th{padding:10px 12px;text-align:left;font-size:10.5px;text-transform:uppercase;color:var(--soft);border-bottom:1px solid var(--border);font-weight:600}
+.table td{padding:12px;border-bottom:1px solid var(--border)}
+.table tr:hover td{background:var(--card2)}
+.disease-badge{display:inline-block;padding:3px 10px;border-radius:4px;font-size:10.5px;font-weight:700}
+.disease-NORMAL{background:rgba(52,211,153,.15);color:var(--success)}
+.disease-PNEUMONIA{background:rgba(248,113,113,.15);color:var(--danger)}
+.disease-COVID19{background:rgba(251,191,36,.15);color:var(--warning)}
+.disease-TUBERCULOSIS,.disease-TURBERCULOSIS{background:rgba(96,165,250,.15);color:#60a5fa}
+
+/* ABOUT */
+.about-text{font-size:12.5px;line-height:1.7;color:var(--soft);margin-bottom:12px}
+.about-text b{color:var(--text)}
+.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.feature-item{padding:12px;background:var(--card2);border-radius:8px}
+.feature-item h5{font-size:12px;color:var(--primary);margin-bottom:4px;font-weight:600}
+.feature-item p{font-size:11px;color:var(--soft);line-height:1.5}
+
+/* COMPARISON */
+.model-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:800px){.model-cards{grid-template-columns:1fr}}
+.model-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px}
+.model-name{font-size:20px;font-weight:800;margin-bottom:8px}
+.model-acc{font-size:32px;font-weight:800}
+.model-acc-label{font-size:11px;color:var(--soft);margin-bottom:12px}
+.model-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.model-metric{background:var(--card2);border-radius:6px;padding:8px;text-align:center}
+.model-metric .lbl{font-size:9.5px;color:var(--soft);text-transform:uppercase;font-weight:600;margin-bottom:3px}
+.model-metric .val{font-size:13px;font-weight:700;color:var(--primary)}
+
+/* CHATBOT */
+.chat-btn{position:fixed;bottom:24px;right:24px;width:52px;height:52px;background:linear-gradient(135deg,var(--primary),var(--primary2));border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:20px;cursor:pointer;box-shadow:0 8px 24px -6px rgba(56,189,248,.5);z-index:1000;border:none}
+.chat-window{position:fixed;bottom:88px;right:24px;width:340px;height:440px;background:var(--card);border:1px solid var(--card2);border-radius:12px;display:none;flex-direction:column;box-shadow:0 20px 50px -12px rgba(0,0,0,.7);z-index:1000;overflow:hidden}
+.chat-window.active{display:flex}
+.chat-header{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);background:var(--card2)}
+.chat-header h4{font-size:12.5px;color:var(--primary)}
+.chat-close{cursor:pointer;color:var(--soft)}
+.chat-body{flex:1;padding:14px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;background:var(--bg)}
+.chat-msg{padding:9px 12px;border-radius:10px;font-size:12px;max-width:85%;line-height:1.45}
+.msg-bot{background:var(--card2);color:var(--text);align-self:flex-start;border-bottom-left-radius:3px}
+.msg-user{background:var(--primary);color:#0f172a;font-weight:500;align-self:flex-end;border-bottom-right-radius:3px}
+.chat-input{padding:10px;border-top:1px solid var(--border);display:flex;gap:8px;background:var(--card)}
+.chat-input input{flex:1;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;outline:none}
+.chat-input input:focus{border-color:var(--primary)}
+.chat-send{background:var(--primary);border:none;width:34px;height:34px;border-radius:8px;color:#0f172a;cursor:pointer;display:flex;align-items:center;justify-content:center}
+</style>
 </head>
 <body>
 
-    <aside class="sidebar">
-        <div class="brand"><i class="fa-solid fa-heart-pulse"></i> MedVision EMR</div>
-        <nav class="nav">
-            <div class="nav-item active" onclick="showPage('diagnosis', this)"><i class="fa-solid fa-stethoscope"></i> New Diagnosis</div>
-            <div class="nav-item" onclick="showPage('history', this)"><i class="fa-solid fa-database"></i> Patient Records</div>
-            <div class="nav-item" onclick="showPage('analytics', this)"><i class="fa-solid fa-chart-pie"></i> Analytics</div>
-            <div class="nav-item" onclick="showPage('settings', this)"><i class="fa-solid fa-gear"></i> Settings</div>
-        </nav>
-        <div class="nav-footer">
-            <div class="avatar">DR</div>
-            <div class="nav-footer-info"><h4>Dr. Komal</h4><p>Radiology</p></div>
-        </div>
-    </aside>
+<aside class="sidebar">
+<div class="logo"><i class="fa-solid fa-heart-pulse"></i></div>
+<button class="nav-btn active" onclick="nav('dashboard',this)" title="Diagnosis"><i class="fa-solid fa-microscope"></i></button>
+<button class="nav-btn" onclick="nav('history',this)" title="History"><i class="fa-solid fa-clock-rotate-left"></i></button>
+<button class="nav-btn" onclick="nav('comparison',this)" title="Comparison"><i class="fa-solid fa-code-compare"></i></button>
+<button class="nav-btn" onclick="nav('about',this)" title="About"><i class="fa-solid fa-circle-info"></i></button>
+</aside>
 
-    <main class="main">
-        <header class="topbar">
-            <h1 id="pageTitle">Clinical Dashboard</h1>
-            <div class="topbar-right">
-                <i class="fa-regular fa-bell"></i>
-                <span>|</span>
-                <span>Today: <strong id="dateDisplay"></strong></span>
-            </div>
-        </header>
+<div class="main">
+<div class="topbar">
+<div><div class="page-title" id="pageTitle">Clinical Diagnosis</div><div class="page-sub" id="pageSub">AI-powered chest X-ray analysis</div></div>
+<div class="user-chip"><div class="user-avatar" id="userAvatar">D</div><span id="userName">Doctor</span></div>
+</div>
 
-        <div class="content">
-            <!-- PAGE: DIAGNOSIS -->
-            <div id="diagnosis" class="page-section active">
-                <div class="patient-bar">
-                    <div class="input-group"><label>Patient Name</label><input type="text" id="pName" placeholder="John Doe"></div>
-                    <div class="input-group"><label>Age</label><input type="number" id="pAge" placeholder="45"></div>
-                    <div class="input-group"><label>Heart Rate</label><input type="number" id="pHR" placeholder="80"></div>
-                    <div class="input-group"><label>BP</label><input type="text" id="pBP" placeholder="120/80"></div>
-                    <div class="input-group"><label>Symptoms</label><input type="text" id="pSymptoms" placeholder="Fever, cough..."></div>
-                </div>
-                <div class="main-grid">
-                    <div class="card">
-                        <div class="card-header"><i class="fa-solid fa-x-ray"></i> Diagnostic Imaging</div>
-                        <div class="card-body">
-                            <label class="upload-box">
-                                <input type="file" id="fileInput" accept="image/*" onchange="handleImageUpload(event)" style="display: none;">
-                                <div id="uploadPlaceholder"><i class="fa-solid fa-cloud-arrow-up"></i><p>Click to upload X-ray</p></div>
-                                <img id="imagePreview">
-                            </label>
-                            <div id="qualityCheckPanel" class="quality-alert hidden"><b>Quality Check:</b> <span id="qualityText"></span></div>
-                            <button class="btn-analyze hidden" id="analyzeBtn" onclick="runAnalysis()"><i class="fa-solid fa-microscope"></i> Run AI Analysis</button>
-                        </div>
-                    </div>
-                    <div class="card" id="emptyState">
-                        <div class="card-header"><i class="fa-solid fa-notes-medical"></i> AI Diagnostic Report</div>
-                        <div class="card-body" style="text-align: center; padding: 60px 20px;">
-                            <i class="fa-solid fa-folder-open" style="font-size: 40px; color: var(--border); margin-bottom: 15px;"></i>
-                            <p style="font-size: 14px; color: var(--text-muted);">Upload an X-ray to view AI analysis.</p>
-                        </div>
-                    </div>
-                    <div class="card hidden" id="resultCard">
-                        <div class="card-header"><i class="fa-solid fa-notes-medical"></i> AI Diagnostic Report</div>
-                        <div class="card-body" id="diagnosisContent"></div>
-                    </div>
-                </div>
-                <div id="bottomResults" class="bottom-grid hidden">
-                    <div class="card">
-                        <div class="card-header"><i class="fa-solid fa-chart-bar"></i> Class Probabilities</div>
-                        <div class="card-body" id="probContainer"></div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header"><i class="fa-solid fa-fire"></i> Grad-CAM Heatmap</div>
-                        <div class="card-body" style="padding: 10px;">
-                            <div class="gradcam-wrap"><img id="gradcamImage" src=""><div class="gradcam-overlay"></div></div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header"><i class="fa-solid fa-images"></i> Similar Patients</div>
-                        <div class="card-body">
-                            <div class="similar-row" id="similarContainer"></div>
-                            <button class="btn-analyze" style="background: var(--success);" onclick="generatePDF()"><i class="fa-solid fa-file-pdf"></i> Export PDF Report</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<div class="content">
 
-            <!-- PAGE: HISTORY -->
-            <div id="history" class="page-section">
-                <div class="card">
-                    <div class="card-header"><i class="fa-solid fa-database"></i> Patient Records</div>
-                    <table class="history-table">
-                        <thead><tr><th>Date</th><th>Patient Name</th><th>Age</th><th>Diagnosis</th><th>Confidence</th></tr></thead>
-                        <tbody id="historyBody"></tbody>
-                    </table>
-                </div>
-            </div>
+<!-- DASHBOARD -->
+<div id="view-dashboard" class="view active">
+<div class="dash-grid">
+<div>
+<div class="card">
+<div class="card-head"><div class="card-title"><i class="fa-solid fa-user-injured"></i>Patient Info</div><span class="card-badge">Required</span></div>
+<div class="form-row"><div class="form-group" style="flex:2"><label>Name</label><input id="pName" placeholder="Full name"></div><div class="form-group"><label>Age</label><input id="pAge" type="number" placeholder="45"></div></div>
+<div class="form-row"><div class="form-group"><label>Heart Rate</label><input id="pHR" type="number" placeholder="80"></div><div class="form-group"><label>BP</label><input id="pBP" placeholder="120/80"></div></div>
+<div class="form-group"><label>Symptoms</label><textarea id="pSymptoms" placeholder="Fever, cough..."></textarea></div>
+</div>
+<div class="card">
+<div class="card-head"><div class="card-title"><i class="fa-solid fa-x-ray"></i>X-Ray Image</div></div>
+<label class="upload-zone" id="uploadZone"><input type="file" id="fileInput" accept="image/*" onchange="handleUpload(event)" style="display:none"><div id="uploadPlaceholder"><i class="fa-solid fa-cloud-arrow-up"></i><p>Click to upload X-ray</p><div class="hint">JPG, PNG · max 10MB</div></div><img id="imagePreview"></label>
+<div id="qualityPanel" class="hidden" style="margin-top:10px;padding:8px 10px;background:rgba(251,191,36,.12);border-left:3px solid var(--warning);border-radius:6px;font-size:11px"><b>Quality:</b> <span id="qualityText">Checking...</span></div>
+<button class="btn btn-primary hidden" id="analyzeBtn" onclick="runAnalysis()" style="margin-top:12px"><i class="fa-solid fa-bolt"></i>Run AI Diagnosis</button>
+</div>
+</div>
 
-            <!-- PAGE: ANALYTICS -->
-            <div id="analytics" class="page-section">
-                <div class="analytics-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background: #eff6ff; color: var(--primary);"><i class="fa-solid fa-users"></i></div>
-                        <div class="stat-info"><h3 id="totalPatients">0</h3><p>Total Patients</p></div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background: #fef2f2; color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                        <div class="stat-info"><h3 id="criticalCases">0</h3><p>High Risk Cases</p></div>
-                    </div>
-                </div>
-                <div class="analytics-grid">
-                    <div class="chart-card">
-                        <div style="font-size:15px; font-weight:600; margin-bottom:10px;">Disease Distribution</div>
-                        <div class="chart-container"><canvas id="diseaseChart"></canvas></div>
-                    </div>
-                    <div class="chart-card">
-                        <div style="font-size:15px; font-weight:600; margin-bottom:10px;">Age Groups</div>
-                        <div class="chart-container"><canvas id="ageChart"></canvas></div>
-                    </div>
-                </div>
-            </div>
+<div>
+<div class="card" id="emptyState"><div class="empty-state"><i class="fa-solid fa-stethoscope"></i><h4>Ready for analysis</h4><p>Upload an X-ray image</p></div></div>
+<div class="card hidden" id="loadingState"><div class="loading"><div class="spinner"></div><h4>Running AI analysis...</h4><p>Quality → Classification → Grad-CAM → Uncertainty → Similarity</p></div></div>
+<div id="resultContainer" class="hidden">
+<div class="card">
+<div class="result-banner risk-high" id="resultBanner"><div class="label">AI Diagnosis</div><div class="value" id="mainDiagnosis">—</div><div class="review-tag ok" id="reviewTag">—</div></div>
+<div class="stat-grid"><div class="stat"><div class="lbl">Confidence</div><div class="val" id="statConfidence">—</div></div><div class="stat warn"><div class="lbl">Uncertainty</div><div class="val" id="statUncertainty">—</div></div><div class="stat ok"><div class="lbl">Quality</div><div class="val" id="statQuality" style="font-size:11px">—</div></div></div>
+<div class="recommendation" id="recommendationBox"><b>Recommendation:</b> <span id="recommendationText">—</span></div>
+<button class="btn btn-success" onclick="generatePDF()"><i class="fa-solid fa-file-pdf"></i>Download PDF Report</button>
+</div>
+<div class="card"><div class="card-head"><div class="card-title"><i class="fa-solid fa-chart-simple"></i>Class Probabilities</div><span class="card-badge">4 Classes</span></div><div id="probBarsContainer"></div></div>
+<div class="card"><div class="card-head"><div class="card-title"><i class="fa-solid fa-gauge-high"></i>Uncertainty Estimation</div></div><div class="gauge-row"><div class="gauge"><svg width="80" height="80"><circle cx="40" cy="40" r="34" stroke="#334155" stroke-width="6" fill="none"/><circle id="gaugeCircle" cx="40" cy="40" r="34" stroke="var(--success)" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="213.6" stroke-dashoffset="213.6" style="transition:stroke-dashoffset 1s ease"/></svg><div class="gauge-text"><div class="num" id="uncertaintyScore">—</div><div class="sub">MC Drop</div></div></div><div class="gauge-info"><h4>Confidence Level</h4><p>Based on stochastic forward passes</p><span class="verdict low" id="uncertaintyVerdict">—</span></div></div></div>
+</div>
+</div>
 
-            <!-- PAGE: SETTINGS -->
-            <div id="settings" class="page-section">
-                <div class="settings-grid">
-                    <div class="settings-card">
-                        <h3><i class="fa-solid fa-user-doctor"></i> Doctor Profile</h3>
-                        <div class="form-group"><label>Doctor Name</label><input type="text" id="setName"></div>
-                        <div class="form-group"><label>Hospital</label><input type="text" id="setHospital"></div>
-                        <div class="form-group"><label>Department</label><input type="text" id="setDept"></div>
-                        <button class="btn-save" onclick="saveSettings()">Save Profile</button>
-                    </div>
-                    <div class="settings-card">
-                        <h3><i class="fa-solid fa-sliders"></i> Preferences</h3>
-                        <div class="toggle-row">
-                            <div><strong>Email Alerts</strong><p style="font-size:12px; color:var(--text-muted);">High-risk notifications</p></div>
-                            <label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label>
-                        </div>
-                        <div class="toggle-row">
-                            <div><strong>Auto-Save</strong><p style="font-size:12px; color:var(--text-muted);">Save PDFs automatically</p></div>
-                            <label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label>
-                        </div>
-                        <div class="toggle-row" style="margin-top:20px;">
-                            <button class="btn-save" style="background:var(--danger);" onclick="logout()">Logout</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
+<div>
+<div class="card hidden" id="gradcamCard"><div class="card-head"><div class="card-title"><i class="fa-solid fa-fire"></i>Grad-CAM</div><span class="card-badge">Explainability</span></div><img id="gradcamImage" class="gradcam-img" src="" alt="Grad-CAM"><div class="gradcam-legend"><span>Low attention</span><div class="legend-bar"></div><span>High</span></div></div>
+<div class="card hidden" id="similarCard"><div class="card-head"><div class="card-title"><i class="fa-solid fa-images"></i>Similar X-Rays</div><span class="card-badge">Top 5</span></div><div class="similar-grid" id="similarImagesContainer"></div></div>
+<div class="card" id="twinCard" style="opacity:.5;pointer-events:none"><div class="card-head"><div class="card-title"><i class="fa-solid fa-chart-line"></i>Treatment Delay</div><span class="card-badge" style="background:rgba(251,191,36,.15);color:var(--warning)">Illustrative</span></div><div class="chart-wrap"><canvas id="recoveryChart"></canvas></div><div class="slider-wrap"><div class="slider-label"><span>Delay</span><span id="delayValue">0 days</span></div><input type="range" min="0" max="7" value="0" id="delaySlider" oninput="updateChart()"></div><div style="font-size:9.5px;color:var(--dim);margin-top:8px;text-align:center;font-style:italic">Demo visualization only</div></div>
+</div>
+</div>
+</div>
 
-    <div class="chat-toggle" onclick="document.getElementById('chatPanel').classList.toggle('active')"><i class="fa-solid fa-comment-dots"></i></div>
-    <div class="chat-panel" id="chatPanel">
-        <div class="chat-top"><h4><i class="fa-solid fa-robot"></i> EMR Assistant</h4><i class="fa-solid fa-xmark" style="cursor:pointer;" onclick="document.getElementById('chatPanel').classList.remove('active')"></i></div>
-        <div class="chat-msgs" id="chatMsgs"><div class="msg bot">Hello Dr. Komal. How can I assist you?</div></div>
-        <div class="chat-input-wrap">
-            <input type="text" id="chatInput" placeholder="Type..." onkeypress="if(event.key==='Enter') sendMsg()">
-            <button class="chat-send" onclick="sendMsg()"><i class="fa-solid fa-paper-plane"></i></button>
-        </div>
-    </div>
+<!-- HISTORY -->
+<div id="view-history" class="view">
+<div class="card">
+<div class="card-head"><div class="card-title"><i class="fa-solid fa-clock-rotate-left"></i>Patient History</div><span class="card-badge" id="historyCount">0 records</span></div>
+<table class="table"><thead><tr><th>Date</th><th>Patient</th><th>Age</th><th>Diagnosis</th><th>Confidence</th></tr></thead><tbody id="historyBody"><tr><td colspan="5" style="text-align:center;padding:30px;color:var(--dim)">Loading...</td></tr></tbody></table>
+</div>
+</div>
 
-    <script>
-        document.getElementById('dateDisplay').innerText = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+<!-- COMPARISON -->
+<div id="view-comparison" class="view">
+<div class="card">
+<div class="card-head"><div class="card-title"><i class="fa-solid fa-code-compare"></i>Model Comparison</div><span class="card-badge" id="comparisonBadge">Loading...</span></div>
+<p style="font-size:12px;color:var(--soft);line-height:1.5;margin-bottom:16px">EfficientNet-B0 (production) vs ResNet18</p>
+<div class="model-cards">
+<div class="model-card"><div class="model-name" id="model1Name" style="color:var(--primary)">—</div><div class="model-acc" id="model1Acc">—</div><div class="model-acc-label">Test Accuracy</div><div class="model-metrics"><div class="model-metric"><div class="lbl">Precision</div><div class="val" id="model1Prec">—</div></div><div class="model-metric"><div class="lbl">Recall</div><div class="val" id="model1Rec">—</div></div><div class="model-metric"><div class="lbl">F1</div><div class="val" id="model1F1">—</div></div></div></div>
+<div class="model-card"><div class="model-name" id="model2Name" style="color:#f472b6">—</div><div class="model-acc" id="model2Acc">—</div><div class="model-acc-label">Test Accuracy</div><div class="model-metrics"><div class="model-metric"><div class="lbl">Precision</div><div class="val" id="model2Prec">—</div></div><div class="model-metric"><div class="lbl">Recall</div><div class="val" id="model2Rec">—</div></div><div class="model-metric"><div class="lbl">F1</div><div class="val" id="model2F1">—</div></div></div></div>
+</div>
+<div class="chart-wrap" style="height:220px;margin-bottom:16px"><canvas id="modelComparisonChart"></canvas></div>
+<div class="card-head"><div class="card-title"><i class="fa-solid fa-table"></i>Per-Class F1 Score</div></div>
+<table class="table"><thead><tr><th>Disease</th><th style="text-align:center">Model A</th><th style="text-align:center">Model B</th><th style="text-align:center">Winner</th></tr></thead><tbody id="perClassBody"><tr><td colspan="4" style="text-align:center;padding:20px;color:var(--dim)">Loading...</td></tr></tbody></table>
+<div style="margin-top:16px;padding:14px;background:rgba(56,189,248,.08);border-left:3px solid var(--primary);border-radius:6px"><div style="font-size:11.5px;color:var(--primary);font-weight:700;margin-bottom:6px"><i class="fa-solid fa-lightbulb"></i> Summary</div><div id="comparisonSummary" style="font-size:12px;line-height:1.5">Loading...</div></div>
+</div>
+</div>
 
-        function showPage(pageId, el) {
-            document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-            el.classList.add('active');
-            
-            const titles = { diagnosis: "Clinical Dashboard", history: "Patient Records", analytics: "Hospital Analytics", settings: "Settings" };
-            document.getElementById('pageTitle').innerText = titles[pageId];
+<!-- ABOUT -->
+<div id="view-about" class="view">
+<div class="card"><div class="card-head"><div class="card-title"><i class="fa-solid fa-bullseye"></i>Project Overview</div></div><p class="about-text"><b>MedVision AI</b> is an AI-powered chest X-ray analysis system using Deep Learning, Computer Vision and Explainable AI. Beyond classification, it evaluates image quality, estimates prediction uncertainty, explains model decisions, retrieves similar images and generates structured reports — making analysis <b>transparent, interpretable and reliability-aware</b>.</p></div>
+<div class="card"><div class="card-head"><div class="card-title"><i class="fa-solid fa-star"></i>Key Features (All Real)</div></div><div class="feature-grid"><div class="feature-item"><h5>Multi-class Classification</h5><p>EfficientNet-B0 transfer learning</p></div><div class="feature-item"><h5>Image Quality Check</h5><p>OpenCV blur/brightness/contrast</p></div><div class="feature-item"><h5>Grad-CAM</h5><p>Real gradient-based heatmap</p></div><div class="feature-item"><h5>MC Dropout</h5><p>Uncertainty from stochastic passes</p></div><div class="feature-item"><h5>Similarity Search</h5><p>Cosine similarity, 1280-D features</p></div><div class="feature-item"><h5>Auto PDF Report</h5><p>jsPDF clinical report</p></div><div class="feature-item"><h5>Model Comparison</h5><p>EfficientNet vs ResNet18</p></div><div class="feature-item"><h5>Human Review Flagging</h5><p>Uncertain cases auto-flagged</p></div></div></div>
+<div class="card"><div class="card-head"><div class="card-title"><i class="fa-solid fa-triangle-exclamation"></i>Honest Disclosure</div></div><p class="about-text"><b>Real:</b> Classification, quality check, Grad-CAM, uncertainty, similar retrieval, PDF, database, comparison metrics.</p><p class="about-text"><b>Illustrative:</b> Treatment delay simulator (labeled).</p><p class="about-text"><b>Limitations:</b> Imbalanced dataset · limited categories · Grad-CAM highlights influential regions but not medically correct localization · not independently validated · <b>research prototype, not a replacement for doctors</b>.</p></div>
+</div>
 
-            if (pageId === 'history') loadHistory();
-            if (pageId === 'analytics') loadAnalytics();
-            if (pageId === 'settings') {
-                document.getElementById('setName').value = localStorage.getItem('docName') || "Dr. Komal";
-                document.getElementById('setHospital').value = localStorage.getItem('hospital') || "MedVision AI Hospital";
-                document.getElementById('setDept').value = localStorage.getItem('dept') || "Radiology";
-            }
-        }
+</div>
+</div>
 
-        function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    document.getElementById('imagePreview').src = e.target.result;
-                    document.getElementById('imagePreview').style.display = 'block';
-                    document.getElementById('uploadPlaceholder').style.display = 'none';
-                    document.getElementById('analyzeBtn').classList.remove('hidden');
-                    document.getElementById('qualityCheckPanel').classList.remove('hidden');
-                    document.getElementById('qualityText').innerText = "Processing...";
-                    setTimeout(() => { document.getElementById('qualityText').innerText = "Acceptable (Sharp, Good Contrast)."; }, 1000);
-                };
-                reader.readAsDataURL(file);
-            }
-        }
+<button class="chat-btn" onclick="toggleChat()"><i class="fa-solid fa-comment-dots"></i></button>
+<div class="chat-window" id="chatWindow">
+<div class="chat-header"><h4><i class="fa-solid fa-comment-dots"></i> Quick Help</h4><i class="fa-solid fa-xmark chat-close" onclick="toggleChat()"></i></div>
+<div class="chat-body" id="chatBody"><div class="chat-msg msg-bot">Hi Doctor! Ask me about pneumonia, COVID, TB, uncertainty, or Grad-CAM.</div></div>
+<div class="chat-input"><input id="chatInput" placeholder="Ask..." onkeypress="if(event.key==='Enter')sendMessage()"><button class="chat-send" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button></div>
+</div>
 
-        async function runAnalysis() {
-            document.getElementById('analyzeBtn').classList.add('hidden');
-            document.getElementById('emptyState').classList.add('hidden');
-            document.getElementById('resultCard').classList.remove('hidden');
-            document.getElementById('bottomResults').classList.remove('hidden');
-            const formData = new FormData();
-            formData.append("file", document.getElementById('fileInput').files[0]);
-            formData.append("patient_name", document.getElementById('pName').value || "Unknown");
-            formData.append("age", document.getElementById('pAge').value || 0);
-            formData.append("symptoms", document.getElementById('pSymptoms').value || "");
-            try {
-                const res = await fetch("http://localhost:8001/predict/diagnosis", { method: "POST", body: formData });
-                const data = await res.json();
-                document.getElementById('gradcamImage').src = document.getElementById('imagePreview').src;
-                const riskColor = data.risk === 'HIGH' ? 'var(--danger)' : 'var(--success)';
-                document.getElementById('diagnosisContent').innerHTML = `
-                    <div class="diagnosis-title" style="color: ${riskColor};">${data.diagnosis}</div>
-                    <span class="risk-tag" style="background: ${riskColor};">${data.risk} RISK</span>
-                    <div class="confidence-box">
-                        <div class="conf-item"><p>Confidence</p><h3>${data.confidence}%</h3></div>
-                        <div class="conf-item"><p>Uncertainty</p><h3>${data.uncertainty || 2.5}%</h3></div>
-                    </div>
-                    <div class="rec-box"><strong>Recommendation:</strong><br>${data.recommendation}</div>
-                `;
-                document.getElementById('probContainer').innerHTML = `
-                    <div class="prob-row"><div class="prob-label">COVID-19</div><div class="prob-track"><div class="prob-fill" style="width: ${data.probabilities?.COVID19 || 5}%; background: #f59e0b;"></div></div><div class="prob-value">${data.probabilities?.COVID19 || 5}%</div></div>
-                    <div class="prob-row"><div class="prob-label">Normal</div><div class="prob-track"><div class="prob-fill" style="width: ${data.probabilities?.NORMAL || 10}%; background: #10b981;"></div></div><div class="prob-value">${data.probabilities?.NORMAL || 10}%</div></div>
-                    <div class="prob-row"><div class="prob-label">Pneumonia</div><div class="prob-track"><div class="prob-fill" style="width: ${data.probabilities?.PNEUMONIA || 80}%; background: #ef4444;"></div></div><div class="prob-value">${data.probabilities?.PNEUMONIA || 80}%</div></div>
-                    <div class="prob-row"><div class="prob-label">Tuberculosis</div><div class="prob-track"><div class="prob-fill" style="width: ${data.probabilities?.TUBERCULOSIS || 5}%; background: #a855f7;"></div></div><div class="prob-value">${data.probabilities?.TUBERCULOSIS || 5}%</div></div>
-                `;
-                document.getElementById('similarContainer').innerHTML = `
-                    <div class="similar-item"><img src="${document.getElementById('imagePreview').src}"><p>95%</p></div>
-                    <div class="similar-item"><img src="${document.getElementById('imagePreview').src}"><p>91%</p></div>
-                    <div class="similar-item"><img src="${document.getElementById('imagePreview').src}"><p>88%</p></div>
-                `;
-            } catch (err) { alert("Backend connection failed."); document.getElementById('analyzeBtn').classList.remove('hidden'); }
-        }
+<script>
+const BACKEND='http://localhost:8000';
+const docId=localStorage.getItem('doctorId')||'Doctor';
+document.getElementById('userName').innerText=docId;
+document.getElementById('userAvatar').innerText=docId.charAt(0).toUpperCase();
 
-        async function loadHistory() {
-            const tbody = document.getElementById('historyBody');
-            tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Loading...</td></tr>";
-            try {
-                const res = await fetch("http://localhost:8001/patients/history");
-                const history = await res.json();
-                tbody.innerHTML = "";
-                if (history.length === 0) { tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>No records found.</td></tr>"; return; }
-                history.forEach(r => {
-                    tbody.innerHTML += `<tr><td>${r.date}</td><td>${r.name}</td><td>${r.age}</td><td><strong>${r.diagnosis}</strong></td><td>${r.confidence}%</td></tr>`;
-                });
-            } catch (err) { tbody.innerHTML = "<tr><td colspan='5' style='text-align:center; color: var(--danger);'>Failed to load.</td></tr>"; }
-        }
+const viewMeta={dashboard:{t:'Clinical Diagnosis',s:'AI-powered chest X-ray analysis'},history:{t:'Patient History',s:'All diagnosis records'},comparison:{t:'Model Comparison',s:'EfficientNet-B0 vs ResNet18'},about:{t:'About',s:'Reliability-aware medical AI'}};
+function nav(v,el){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');document.getElementById('pageTitle').innerText=viewMeta[v].t;document.getElementById('pageSub').innerText=viewMeta[v].s;if(v==='history')loadHistory();if(v==='comparison')loadComparison()}
 
-        let chart1 = null, chart2 = null;
-        async function loadAnalytics() {
-            document.getElementById('totalPatients').innerText = "0";
-            document.getElementById('criticalCases').innerText = "0";
-            try {
-                const res = await fetch("http://localhost:8001/patients/history");
-                const history = await res.json();
-                document.getElementById('totalPatients').innerText = history.length;
-                const highRisk = history.filter(h => h.confidence > 80 && h.diagnosis !== 'NORMAL').length;
-                document.getElementById('criticalCases').innerText = highRisk;
+async function handleUpload(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{document.getElementById('imagePreview').src=ev.target.result;document.getElementById('imagePreview').style.display='block';document.getElementById('uploadPlaceholder').style.display='none';document.getElementById('analyzeBtn').classList.remove('hidden')};r.readAsDataURL(f);const qp=document.getElementById('qualityPanel'),qt=document.getElementById('qualityText');qp.classList.remove('hidden');qt.innerText='Checking...';try{const fd=new FormData();fd.append('file',f);const res=await fetch(`${BACKEND}/check-quality`,{method:'POST',body:fd});const d=await res.json();const good=(d.status||'').toLowerCase().match(/accept|good|ok|fine/);qp.style.background=good?'rgba(52,211,153,.12)':'rgba(251,191,36,.12)';qp.style.borderColor=good?'var(--success)':'var(--warning)';qt.innerText=d.reason||`Status: ${d.status||'Unknown'}`}catch(err){qp.style.background='rgba(248,113,113,.12)';qp.style.borderColor='var(--danger)';qt.innerText='Quality check unavailable'}}
 
-                const counts = { COVID19: 0, NORMAL: 0, PNEUMONIA: 0, TUBERCULOSIS: 0 };
-                history.forEach(h => { if (counts[h.diagnosis] !== undefined) counts[h.diagnosis]++; });
+async function runAnalysis(){document.getElementById('analyzeBtn').classList.add('hidden');document.getElementById('emptyState').classList.add('hidden');document.getElementById('resultContainer').classList.add('hidden');document.getElementById('loadingState').classList.remove('hidden');const fd=new FormData();fd.append('file',document.getElementById('fileInput').files[0]);fd.append('patient_name',document.getElementById('pName').value||'Unknown');fd.append('age',document.getElementById('pAge').value||0);fd.append('symptoms',document.getElementById('pSymptoms').value||'');try{const res=await fetch(`${BACKEND}/predict/diagnosis`,{method:'POST',body:fd});if(!res.ok)throw new Error('Backend '+res.status);const d=await res.json();if(d.error)throw new Error(d.error);document.getElementById('loadingState').classList.add('hidden');document.getElementById('resultContainer').classList.remove('hidden');document.getElementById('gradcamCard').classList.remove('hidden');document.getElementById('similarCard').classList.remove('hidden');document.getElementById('twinCard').style.opacity='1';document.getElementById('twinCard').style.pointerEvents='auto';renderResults(d)}catch(err){document.getElementById('loadingState').classList.add('hidden');document.getElementById('analyzeBtn').classList.remove('hidden');document.getElementById('emptyState').classList.remove('hidden');alert('Analysis failed: '+err.message)}}
 
-                if (chart1) chart1.destroy();
-                chart1 = new Chart(document.getElementById('diseaseChart').getContext('2d'), {
-                    type: 'doughnut',
-                    data: { labels: ['COVID-19', 'Normal', 'Pneumonia', 'Tuberculosis'], datasets: [{ data: [counts.COVID19, counts.NORMAL, counts.PNEUMONIA, counts.TUBERCULOSIS], backgroundColor: ['#f59e0b', '#10b981', '#ef4444', '#a855f7'], borderWidth: 0 }] },
-                    options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } } }
-                });
+function renderResults(d){
+const diag=d.diagnosis||'UNKNOWN',risk=d.risk||'MODERATE';
+const rc=risk==='HIGH'?'risk-high':risk==='LOW'?'risk-low':'risk-moderate';
+document.getElementById('resultBanner').className='result-banner '+rc;
+document.getElementById('mainDiagnosis').innerText=diag;
+const rev=d.needs_review===true||(typeof d.uncertainty==='number'&&d.uncertainty>2.0);
+const rt=document.getElementById('reviewTag');rt.className='review-tag '+(rev?'flag':'ok');rt.innerText=rev?'FLAGGED':'APPROVED';
+document.getElementById('statConfidence').innerText=d.confidence!=null?d.confidence+'%':'—';
+document.getElementById('statUncertainty').innerText=d.uncertainty!=null?d.uncertainty+'%':'—';
+document.getElementById('statQuality').innerText=d.quality||'—';
+document.getElementById('recommendationText').innerText=d.recommendation||'—';
+const probs=d.probabilities||{};
+const cls=[{k:'COVID19',c:'var(--warning)'},{k:'NORMAL',c:'var(--success)'},{k:'PNEUMONIA',c:'var(--danger)'},{k:'TURBERCULOSIS',c:'#60a5fa'}];
+if(Object.keys(probs).length>0){document.getElementById('probBarsContainer').innerHTML=cls.map(x=>{const v=probs[x.k];if(v==null)return'';const win=x.k===diag||(x.k==='TURBERCULOSIS'&&diag==='TUBERCULOSIS');const name=x.k==='TURBERCULOSIS'?'TUBERCULOSIS':x.k;return `<div class="prob-row ${win?'winner':''}"><div class="prob-head"><span class="name">${name}</span><span class="pct">${typeof v==='number'?v.toFixed(1)+'%':'—'}</span></div><div class="prob-track"><div class="prob-fill" style="width:${typeof v==='number'?v:0}%;background:${x.c}"></div></div></div>`}).join('')}else{document.getElementById('probBarsContainer').innerHTML='<div class="not-avail"><i class="fa-solid fa-circle-info"></i>Probabilities not returned</div>'}
+if(typeof d.uncertainty==='number'){const u=d.uncertainty;document.getElementById('uncertaintyScore').innerText=u.toFixed(1)+'%';const off=213.6-(Math.min(u,20)/20)*213.6;document.getElementById('gaugeCircle').style.strokeDashoffset=off;const v=document.getElementById('uncertaintyVerdict');if(u<2){document.getElementById('gaugeCircle').style.stroke='var(--success)';v.className='verdict low';v.innerText='Low — Auto-approved'}else if(u<5){document.getElementById('gaugeCircle').style.stroke='var(--warning)';v.className='verdict med';v.innerText='Medium — Review advised'}else{document.getElementById('gaugeCircle').style.stroke='var(--danger)';v.className='verdict high';v.innerText='High — Doctor review required'}}else{document.getElementById('uncertaintyScore').innerText='—'}
+const gci=document.getElementById('gradcamImage');if(d.gradcam_url){gci.src=d.gradcam_url.startsWith('http')?d.gradcam_url:`${BACKEND}${d.gradcam_url}`;gci.onerror=()=>{gci.style.display='none'}}else{gci.style.display='none'}
+const sims=d.similar||d.similar_images||[];const sc=document.getElementById('similarImagesContainer');if(Array.isArray(sims)&&sims.length>0){sc.innerHTML=sims.slice(0,5).map((s,i)=>{const url=typeof s==='string'?(s.startsWith('http')?s:`${BACKEND}${s.startsWith('/')?'':'/'}${s}`):null;if(!url)return'';return `<div class="similar-item"><img src="${url}" onerror="this.parentElement.style.display='none'"><div class="match">#${i+1}</div></div>`}).join('')}else{sc.innerHTML='<div class="not-avail" style="grid-column:1/-1"><i class="fa-solid fa-circle-info"></i>No similar images</div>'}
+updateChart()}
 
-                let ageGroups = { "0-18": 0, "19-35": 0, "36-50": 0, "50+": 0 };
-                history.forEach(h => {
-                    const age = parseInt(h.age);
-                    if (age <= 18) ageGroups["0-18"]++;
-                    else if (age <= 35) ageGroups["19-35"]++;
-                    else if (age <= 50) ageGroups["36-50"]++;
-                    else ageGroups["50+"]++;
-                });
+async function loadHistory(){const b=document.getElementById('historyBody');b.innerHTML='<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--dim)">Loading...</td></tr>';try{const res=await fetch(`${BACKEND}/patients/history`);const h=await res.json();document.getElementById('historyCount').innerText=h.length+' records';if(!h.length){b.innerHTML='<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--dim)">No records yet.</td></tr>';return}b.innerHTML=h.map(r=>{const d=(r.diagnosis||'NORMAL').replace('TURBERCULOSIS','TUBERCULOSIS');return `<tr><td>${r.date}</td><td><b>${r.name}</b></td><td>${r.age}</td><td><span class="disease-badge disease-${d}">${d}</span></td><td>${(r.confidence||0).toFixed(1)}%</td></tr>`}).join('')}catch(e){b.innerHTML='<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--danger)">Backend not connected</td></tr>'}}
 
-                if (chart2) chart2.destroy();
-                chart2 = new Chart(document.getElementById('ageChart').getContext('2d'), {
-                    type: 'bar',
-                    data: { labels: Object.keys(ageGroups), datasets: [{ label: 'Patients', data: Object.values(ageGroups), backgroundColor: '#2563eb', borderRadius: 4 }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-                });
-            } catch (err) { console.error(err); }
-        }
+let mcchart=null;
+async function loadComparison(){try{const res=await fetch(`${BACKEND}/model/comparison`);if(!res.ok)throw new Error('Unavailable');const d=await res.json();if(d.error)throw new Error(d.error);const[m1,m2]=d.models;document.getElementById('model1Name').innerText=m1.name;document.getElementById('model1Acc').innerText=m1.accuracy.toFixed(2)+'%';document.getElementById('model1Prec').innerText=m1.precision.toFixed(1)+'%';document.getElementById('model1Rec').innerText=m1.recall.toFixed(1)+'%';document.getElementById('model1F1').innerText=m1.f1_score.toFixed(1)+'%';document.getElementById('model2Name').innerText=m2.name;document.getElementById('model2Acc').innerText=m2.accuracy.toFixed(2)+'%';document.getElementById('model2Prec').innerText=m2.precision.toFixed(1)+'%';document.getElementById('model2Rec').innerText=m2.recall.toFixed(1)+'%';document.getElementById('model2F1').innerText=m2.f1_score.toFixed(1)+'%';document.getElementById('comparisonBadge').innerText='Live';if(mcchart)mcchart.destroy();mcchart=new Chart(document.getElementById('modelComparisonChart').getContext('2d'),{type:'bar',data:{labels:['Accuracy','Precision','Recall','F1'],datasets:[{label:m1.name,data:[m1.accuracy,m1.precision,m1.recall,m1.f1_score],backgroundColor:'rgba(56,189,248,.8)',borderRadius:6},{label:m2.name,data:[m2.accuracy,m2.precision,m2.recall,m2.f1_score],backgroundColor:'rgba(244,114,182,.8)',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:'#94a3b8',font:{size:11},usePointStyle:true,boxWidth:8}}},scales:{y:{beginAtZero:true,max:100,grid:{color:'rgba(148,163,184,.1)'},ticks:{color:'#94a3b8',font:{size:10},callback:v=>v+'%'}},x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:11}}}}}});const cls=['COVID19','NORMAL','PNEUMONIA','TURBERCULOSIS'];const body=document.getElementById('perClassBody');if(m1.per_class&&m2.per_class){body.innerHTML=cls.map(c=>{const f1a=m1.per_class[c]?.f1??m1.per_class[c==='TURBERCULOSIS'?'TUBERCULOSIS':c]?.f1??0;const f1b=m2.per_class[c]?.f1??m2.per_class[c==='TURBERCULOSIS'?'TUBERCULOSIS':c]?.f1??0;const win=f1a>f1b?m1.name:m2.name;const d=c.replace('TURBERCULOSIS','TUBERCULOSIS');return `<tr><td><span class="disease-badge disease-${d}">${d}</span></td><td style="text-align:center;font-weight:700;color:${f1a>f1b?'var(--primary)':'var(--soft)'}">${f1a.toFixed(1)}%</td><td style="text-align:center;font-weight:700;color:${f1b>f1a?'#f472b6':'var(--soft)'}">${f1b.toFixed(1)}%</td><td style="text-align:center"><b style="color:${f1a>f1b?'var(--primary)':'#f472b6'}">${win}</b></td></tr>`}).join('')}document.getElementById('comparisonSummary').innerText=d.summary||'—'}catch(e){document.getElementById('comparisonBadge').innerText='Unavailable';document.getElementById('comparisonSummary').innerText='Comparison: '+e.message}}
 
-        function saveSettings() {
-            localStorage.setItem('docName', document.getElementById('setName').value);
-            localStorage.setItem('hospital', document.getElementById('setHospital').value);
-            localStorage.setItem('dept', document.getElementById('setDept').value);
-            alert("Settings Saved!");
-        }
+let twchart=null;
+function updateChart(){const d=Number(document.getElementById('delaySlider').value);document.getElementById('delayValue').innerText=d+' days';const data=[20,35,50,70].map(v=>v+d*5);if(twchart)twchart.destroy();const c=document.getElementById('recoveryChart');if(!c)return;twchart=new Chart(c.getContext('2d'),{type:'line',data:{labels:['D1','D3','D5','D7'],datasets:[{data,borderColor:'#38bdf8',backgroundColor:'rgba(56,189,248,.1)',fill:true,tension:.4,pointBackgroundColor:'#818cf8',pointBorderColor:'#fff',pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'rgba(148,163,184,.1)'},ticks:{color:'#94a3b8',font:{size:9}}},x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:9}}}}}})}
 
-        function logout() {
-            localStorage.removeItem('doctorId');
-            window.location.href = 'index.html';
-        }
+function generatePDF(){const{jsPDF}=window.jspdf;const doc=new jsPDF();const n=document.getElementById('pName').value||'N/A';const a=document.getElementById('pAge').value||'N/A';const s=document.getElementById('pSymptoms').value||'—';const dg=document.getElementById('mainDiagnosis').innerText;const cf=document.getElementById('statConfidence').innerText;const un=document.getElementById('statUncertainty').innerText;const ql=document.getElementById('statQuality').innerText;const rc=document.getElementById('recommendationText').innerText;doc.setFont('helvetica','bold');doc.setFontSize(20);doc.setTextColor(56,189,248);doc.text('MedVision AI',105,20,null,null,'center');doc.setFontSize(11);doc.setTextColor(100);doc.text('Clinical Diagnostic Report',105,27,null,null,'center');doc.setDrawColor(56,189,248);doc.line(20,33,190,33);doc.setFontSize(11);doc.setTextColor(30);let y=45;const line=(k,v)=>{doc.setFont('helvetica','bold');doc.text(k+':',20,y);doc.setFont('helvetica','normal');doc.text(String(v),70,y);y+=8};line('Patient',n);line('Age',a);line('Symptoms',s);line('Date',new Date().toLocaleString());y+=4;doc.setDrawColor(220);doc.line(20,y,190,y);y+=10;doc.setFont('helvetica','bold');doc.setFontSize(13);doc.text('AI Analysis',20,y);y+=10;doc.setFontSize(11);line('Diagnosis',dg);line('Confidence',cf);line('Uncertainty',un);line('Quality',ql);y+=4;doc.setDrawColor(220);doc.line(20,y,190,y);y+=10;doc.setFont('helvetica','bold');doc.text('Recommendation:',20,y);y+=7;doc.setFont('helvetica','normal');const rl=doc.splitTextToSize(rc,170);doc.text(rl,20,y);y+=rl.length*6+15;doc.setFontSize(9);doc.setTextColor(150);doc.text(doc.splitTextToSize('AI research prototype. Not a substitute for professional medical diagnosis. Clinical correlation required.',170),20,y);doc.save(`MedVision_${n.replace(/\s+/g,'_')}_${Date.now()}.pdf`)}
 
-        function generatePDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    
-    const pName = document.getElementById('pName').value || "N/A";
-    const pAge = document.getElementById('pAge').value || "N/A";
-    const pHR = document.getElementById('pHR').value || "N/A";
-    const pBP = document.getElementById('pBP').value || "N/A";
-    const symptoms = document.getElementById('pSymptoms').value || "N/A";
-    
-    // Screen se real diagnosis uthao
-    const diagnosisEl = document.querySelector('.diagnosis-title');
-    const diagnosis = diagnosisEl ? diagnosisEl.innerText : "N/A";
-    
-    const confEls = document.querySelectorAll('.conf-item h3');
-    const confidence = confEls[0] ? confEls[0].innerText : "N/A";
-    const uncertainty = confEls[1] ? confEls[1].innerText : "N/A";
-    
-    const recEl = document.querySelector('.rec-box');
-    const recommendation = recEl ? recEl.innerText.replace("Recommendation:", "").trim() : "N/A";
-    
-    // Header
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(22);
-    doc.setTextColor(37, 99, 235);
-    doc.text("MedVision EMR Hospital", 105, 20, null, null, "center");
-    
-    doc.setFontSize(10);
-    doc.setTextColor(100);
-    doc.setFont("helvetica", "normal");
-    doc.text("Department of Radiology & AI Diagnostics", 105, 27, null, null, "center");
-    
-    doc.setLineWidth(0.5);
-    doc.setDrawColor(200);
-    doc.line(20, 32, 190, 32);
-    
-    // Patient Info
-    doc.setFontSize(14);
-    doc.setTextColor(0);
-    doc.setFont("helvetica", "bold");
-    doc.text("Patient Information", 20, 45);
-    
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "normal");
-    doc.text(`Name: ${pName}`, 20, 55);
-    doc.text(`Age: ${pAge}`, 20, 62);
-    doc.text(`Heart Rate: ${pHR} bpm`, 20, 69);
-    doc.text(`Blood Pressure: ${pBP}`, 20, 76);
-    doc.text(`Symptoms: ${symptoms}`, 20, 83);
-    
-    // Diagnosis
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.text("AI Diagnosis Results", 20, 100);
-    
-    doc.setFontSize(16);
-    doc.setTextColor(220, 38, 38);
-    doc.text(`Diagnosis: ${diagnosis}`, 20, 112);
-    
-    doc.setFontSize(11);
-    doc.setTextColor(0);
-    doc.setFont("helvetica", "normal");
-    doc.text(`Confidence: ${confidence}`, 20, 122);
-    doc.text(`Uncertainty: ${uncertainty}`, 20, 130);
-    
-    // Recommendation
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.text("AI Recommendation", 20, 148);
-    
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "normal");
-    const splitRec = doc.splitTextToSize(recommendation, 170);
-    doc.text(splitRec, 20, 158);
-    
-    // Footer
-    doc.setFontSize(9);
-    doc.setTextColor(150);
-    doc.text("This is an AI-generated report. Please consult a senior doctor for final confirmation.", 105, 280, null, null, "center");
-    doc.text(`Generated: ${new Date().toLocaleString()}`, 105, 287, null, null, "center");
-    
-    doc.save(`MedVision_Report_${pName}.pdf`);
-}
-
-
-        function sendMsg() {
-            const input = document.getElementById('chatInput');
-            const msg = input.value.trim();
-            if (!msg) return;
-            const box = document.getElementById('chatMsgs');
-            box.innerHTML += `<div class="msg user">${msg}</div>`;
-            input.value = '';
-            box.scrollTop = box.scrollHeight;
-            setTimeout(() => {
-                let reply = "Please consult a senior doctor.";
-                const m = msg.toLowerCase();
-                if (m.includes("pneumonia")) reply = "Pneumonia is a lung infection treated with antibiotics.";
-                else if (m.includes("fever") || m.includes("cough")) reply = "Common symptoms. Check the X-ray report.";
-                else if (m.includes("hello") || m.includes("hi")) reply = "Hello Doctor. How can I assist?";
-                box.innerHTML += `<div class="msg bot">${reply}</div>`;
-                box.scrollTop = box.scrollHeight;
-            }, 800);
-        }
-    </script>
+function toggleChat(){document.getElementById('chatWindow').classList.toggle('active')}
+function sendMessage(){const i=document.getElementById('chatInput');const m=i.value.trim();if(!m)return;const b=document.getElementById('chatBody');b.innerHTML+=`<div class="chat-msg msg-user">${m}</div>`;i.value='';b.scrollTop=b.scrollHeight;setTimeout(()=>{let r='Consult a senior radiologist for this case.';const l=m.toLowerCase();if(l.includes('pneumonia'))r='Pneumonia: consolidation in lung fields. Check Grad-CAM. If uncertainty >2%, get senior review.';else if(l.includes('covid'))r='COVID-19: bilateral ground-glass opacities. Review confidence + uncertainty.';else if(l.includes('tb')||l.includes('tuberculosis'))r='TB: upper-lobe cavitary lesions. Compare with similar images gallery.';else if(l.includes('uncertainty'))r='MC Dropout: <2% confident, 2-5% review advised, >5% must review.';else if(l.includes('gradcam')||l.includes('grad-cam'))r='Grad-CAM: red regions = high model attention. Cross-check clinically.';else if(l.includes('hello')||l.includes('hi')||l.includes('hey'))r='Hello Doctor! Ask me about pneumonia, COVID, TB, uncertainty, or Grad-CAM.';b.innerHTML+=`<div class="chat-msg msg-bot">${r}</div>`;b.scrollTop=b.scrollHeight},600)}
+</script>
 </body>
 </html>

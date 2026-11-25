@@ -33,3 +33,5 @@ results/
 Thumbs.db
 medvision.db
 results/
+*.backup
+*.bak
