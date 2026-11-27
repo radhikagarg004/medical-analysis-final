@@ -1,0 +1,87 @@
+6.2s 1 0.00s - Debugger warning: It seems that frozen modules are being used, which may
+6.2s 2 0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off
+6.2s 3 0.00s - to python to disable frozen modules.
+6.2s 4 0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.
+6.8s 5 0.00s - Debugger warning: It seems that frozen modules are being used, which may
+6.8s 6 0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off
+6.8s 7 0.00s - to python to disable frozen modules.
+6.8s 8 0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.
+7.8s 9 30760 c084c7b7
+7.8s 10 ['__init__.py', 'data', 'explain', 'inference.py', 'models', 'research', 'run_study.py', 'train.py']
+7.8s 11 /tmp/ipykernel_24/807137380.py:9: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.
+7.8s 12 tarfile.open(fileobj=io.BytesIO(base64.b64decode(B)), mode='r:xz').extractall('/kaggle/working')
+7.8s 13 
+7.8s 14 /tmp/ipykernel_24/807137380.py:9: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.
+7.8s 15 tarfile.open(fileobj=io.BytesIO(base64.b64decode(B)), mode='r:xz').extractall('/kaggle/working')
+10.3s 16 GPU 0: Tesla T4 (UUID: GPU-487fd099-3ab4-922c-2e6c-811ecd031351)
+10.3s 17 GPU 1: Tesla T4 (UUID: GPU-97c14f6f-c0c5-a8a9-0256-1cfff606c813)
+63.6s 18 
+63.6s 19 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+63.6s 20 20 passed, 4 warnings in 45.79s
+63.8s 21 patched 5
+2621.4s 22 data: /kaggle/input/datasets/tawsifurrahman/covid19-radiography-database
+2621.4s 23 stage: audits | seeds [0, 1, 2] | epochs 10
+2621.4s 24 TEST resnet50_image_none_s0: acc 0.9543 | macro-F1 0.9641 | macro-AUROC 0.9952 | ECE 0.0225 -> 0.006 after T=1.56  (42.6 min, total 0.71 h)
+3769.3s 25 TEST resnet50_group_lungs_only_s0: acc 0.9381 | macro-F1 0.943 | macro-AUROC 0.9912 | ECE 0.0267 -> 0.0093 after T=1.47  (19.1 min, total 1.03 h)
+4618.4s 26 TEST resnet50_group_lungs_removed_s0: acc 0.9356 | macro-F1 0.9494 | macro-AUROC 0.9908 | ECE 0.0266 -> 0.0109 after T=1.58  (14.2 min, total 1.27 h)
+5459.1s 27 TEST resnet50_group_lung_crop_s0: acc 0.9471 | macro-F1 0.9538 | macro-AUROC 0.9939 | ECE 0.0265 -> 0.0085 after T=1.64  (14.0 min, total 1.50 h)
+6155.9s 28 TEST efficientnet_b0_image_none_s0: acc 0.9584 | macro-F1 0.9667 | macro-AUROC 0.9951 | ECE 0.0186 -> 0.0089 after T=1.45  (11.6 min, total 1.69 h)
+6979.4s 29 TEST efficientnet_b0_group_lungs_only_s0: acc 0.9349 | macro-F1 0.9399 | macro-AUROC 0.9921 | ECE 0.0203 -> 0.0051 after T=1.29  (13.7 min, total 1.92 h)
+7774.3s 30 TEST efficientnet_b0_group_lungs_removed_s0: acc 0.9263 | macro-F1 0.9399 | macro-AUROC 0.9901 | ECE 0.0185 -> 0.0081 after T=1.27  (13.2 min, total 2.14 h)
+8594.5s 31 TEST efficientnet_b0_group_lung_crop_s0: acc 0.9533 | macro-F1 0.9594 | macro-AUROC 0.9932 | ECE 0.0212 -> 0.006 after T=1.53  (13.7 min, total 2.37 h)
+9686.3s 32 TEST swin_t_image_none_s0: acc 0.9587 | macro-F1 0.965 | macro-AUROC 0.996 | ECE 0.0163 -> 0.0054 after T=1.43  (18.2 min, total 2.67 h)
+10814.2s 33 TEST swin_t_group_lungs_only_s0: acc 0.9308 | macro-F1 0.9346 | macro-AUROC 0.9917 | ECE 0.0308 -> 0.0155 after T=1.30  (18.8 min, total 2.99 h)
+11954.0s 34 TEST swin_t_group_lungs_removed_s0: acc 0.9353 | macro-F1 0.9458 | macro-AUROC 0.9905 | ECE 0.0264 -> 0.0082 after T=1.42  (19.0 min, total 3.30 h)
+13096.6s 35 TEST swin_t_group_lung_crop_s0: acc 0.9478 | macro-F1 0.9534 | macro-AUROC 0.9934 | ECE 0.0266 -> 0.0086 after T=1.51  (19.0 min, total 3.62 h)
+13657.8s 36 TEST efficientnet_b0_group_none_s0_no_clahe: acc 0.9516 | macro-F1 0.9603 | macro-AUROC 0.9938 | ECE 0.0257 -> 0.0093 after T=1.52  (9.4 min, total 3.78 h)
+14340.7s 37 TEST efficientnet_b0_group_none_s0_no_augment: acc 0.9547 | macro-F1 0.9628 | macro-AUROC 0.9934 | ECE 0.0339 -> 0.0088 after T=2.14  (11.4 min, total 3.97 h)
+15058.4s 38 TEST efficientnet_b0_group_none_s0_no_class_weights: acc 0.9526 | macro-F1 0.9612 | macro-AUROC 0.9941 | ECE 0.0292 -> 0.0086 after T=1.71  (12.0 min, total 4.17 h)
+15765.6s 39 TEST efficientnet_b0_group_none_s0_no_pretrained: acc 0.9003 | macro-F1 0.9062 | macro-AUROC 0.9827 | ECE 0.022 -> 0.0153 after T=1.06  (11.8 min, total 4.36 h)
+16539.1s 40 TEST resnet50_image_none_s1: acc 0.9574 | macro-F1 0.9649 | macro-AUROC 0.9958 | ECE 0.0217 -> 0.0067 after T=1.58  (12.9 min, total 4.58 h)
+17364.3s 41 TEST resnet50_group_lungs_only_s1: acc 0.9294 | macro-F1 0.937 | macro-AUROC 0.9909 | ECE 0.0289 -> 0.0114 after T=1.43  (13.8 min, total 4.81 h)
+18204.0s 42 TEST resnet50_group_lungs_removed_s1: acc 0.9308 | macro-F1 0.9437 | macro-AUROC 0.9899 | ECE 0.0271 -> 0.0089 after T=1.52  (14.0 min, total 5.04 h)
+19061.8s 43 TEST resnet50_group_lung_crop_s1: acc 0.9471 | macro-F1 0.9535 | macro-AUROC 0.9938 | ECE 0.0269 -> 0.0077 after T=1.59  (14.3 min, total 5.28 h)
+19836.6s 44 TEST efficientnet_b0_image_none_s1: acc 0.9563 | macro-F1 0.9654 | macro-AUROC 0.9953 | ECE 0.0212 -> 0.0062 after T=1.52  (12.9 min, total 5.49 h)
+20627.5s 45 TEST efficientnet_b0_group_lungs_only_s1: acc 0.9336 | macro-F1 0.9376 | macro-AUROC 0.9913 | ECE 0.0197 -> 0.0038 after T=1.29  (13.2 min, total 5.71 h)
+21394.8s 46 TEST efficientnet_b0_group_lungs_removed_s1: acc 0.9311 | macro-F1 0.9426 | macro-AUROC 0.991 | ECE 0.0304 -> 0.0151 after T=1.55  (12.8 min, total 5.93 h)
+22219.3s 47 TEST efficientnet_b0_group_lung_crop_s1: acc 0.9502 | macro-F1 0.9587 | macro-AUROC 0.9936 | ECE 0.0274 -> 0.0092 after T=1.62  (13.7 min, total 6.15 h)
+23309.1s 48 TEST swin_t_image_none_s1: acc 0.9594 | macro-F1 0.9667 | macro-AUROC 0.9962 | ECE 0.0198 -> 0.0048 after T=1.43  (18.2 min, total 6.46 h)
+24429.3s 49 TEST swin_t_group_lungs_only_s1: acc 0.9377 | macro-F1 0.9417 | macro-AUROC 0.9918 | ECE 0.0307 -> 0.0104 after T=1.38  (18.7 min, total 6.77 h)
+25557.1s 50 TEST swin_t_group_lungs_removed_s1: acc 0.9304 | macro-F1 0.9438 | macro-AUROC 0.99 | ECE 0.0244 -> 0.0093 after T=1.35  (18.8 min, total 7.08 h)
+26684.2s 51 TEST swin_t_group_lung_crop_s1: acc 0.9505 | macro-F1 0.9537 | macro-AUROC 0.9941 | ECE 0.0248 -> 0.0098 after T=1.48  (18.8 min, total 7.39 h)
+27215.3s 52 TEST efficientnet_b0_group_none_s1_no_clahe: acc 0.9557 | macro-F1 0.9641 | macro-AUROC 0.9948 | ECE 0.0247 -> 0.0082 after T=1.54  (8.9 min, total 7.54 h)
+27854.4s 53 TEST efficientnet_b0_group_none_s1_no_augment: acc 0.954 | macro-F1 0.9627 | macro-AUROC 0.9916 | ECE 0.0388 -> 0.0077 after T=2.56  (10.7 min, total 7.72 h)
+28529.3s 54 TEST efficientnet_b0_group_none_s1_no_class_weights: acc 0.9547 | macro-F1 0.9635 | macro-AUROC 0.995 | ECE 0.0264 -> 0.0093 after T=1.63  (11.2 min, total 7.91 h)
+29206.9s 55 TEST efficientnet_b0_group_none_s1_no_pretrained: acc 0.9024 | macro-F1 0.9105 | macro-AUROC 0.9827 | ECE 0.0168 -> 0.013 after T=1.06  (11.3 min, total 8.10 h)
+29970.2s 56 TEST resnet50_image_none_s2: acc 0.9553 | macro-F1 0.963 | macro-AUROC 0.9957 | ECE 0.0185 -> 0.0094 after T=1.50  (12.7 min, total 8.31 h)
+30783.7s 57 TEST resnet50_group_lungs_only_s2: acc 0.9304 | macro-F1 0.9374 | macro-AUROC 0.9908 | ECE 0.0303 -> 0.0056 after T=1.43  (13.6 min, total 8.53 h)
+31596.3s 58 TEST resnet50_group_lungs_removed_s2: acc 0.9273 | macro-F1 0.9432 | macro-AUROC 0.9901 | ECE 0.0275 -> 0.013 after T=1.46  (13.5 min, total 8.76 h)
+32433.6s 59 TEST resnet50_group_lung_crop_s2: acc 0.9474 | macro-F1 0.9537 | macro-AUROC 0.994 | ECE 0.0292 -> 0.011 after T=1.63  (14.0 min, total 8.99 h)
+33096.7s 60 TEST efficientnet_b0_image_none_s2: acc 0.955 | macro-F1 0.9644 | macro-AUROC 0.9953 | ECE 0.019 -> 0.0064 after T=1.44  (11.1 min, total 9.18 h)
+33861.2s 61 TEST efficientnet_b0_group_lungs_only_s2: acc 0.9384 | macro-F1 0.9419 | macro-AUROC 0.9914 | ECE 0.0212 -> 0.0077 after T=1.32  (12.7 min, total 9.39 h)
+34627.0s 62 TEST efficientnet_b0_group_lungs_removed_s2: acc 0.9339 | macro-F1 0.9443 | macro-AUROC 0.9897 | ECE 0.0226 -> 0.009 after T=1.40  (12.8 min, total 9.60 h)
+35411.6s 63 TEST efficientnet_b0_group_lung_crop_s2: acc 0.9509 | macro-F1 0.9575 | macro-AUROC 0.9933 | ECE 0.0255 -> 0.0086 after T=1.51  (13.1 min, total 9.82 h)
+36494.6s 64 TEST swin_t_image_none_s2: acc 0.9615 | macro-F1 0.9677 | macro-AUROC 0.9965 | ECE 0.0197 -> 0.0061 after T=1.49  (18.0 min, total 10.12 h)
+37611.1s 65 TEST swin_t_group_lungs_only_s2: acc 0.9291 | macro-F1 0.9316 | macro-AUROC 0.9916 | ECE 0.034 -> 0.0156 after T=1.38  (18.6 min, total 10.43 h)
+38727.3s 66 TEST swin_t_group_lungs_removed_s2: acc 0.9329 | macro-F1 0.9468 | macro-AUROC 0.99 | ECE 0.0259 -> 0.0085 after T=1.41  (18.6 min, total 10.74 h)
+39849.0s 67 TEST swin_t_group_lung_crop_s2: acc 0.9478 | macro-F1 0.9527 | macro-AUROC 0.9936 | ECE 0.0271 -> 0.0073 after T=1.46  (18.7 min, total 11.05 h)
+39849.0s 68 [time budget reached] not starting efficientnet_b0_group_none_s2_no_clahe
+39849.0s 69 [time budget reached] not starting efficientnet_b0_group_none_s2_no_augment
+39849.0s 70 [time budget reached] not starting efficientnet_b0_group_none_s2_no_class_weights
+39849.0s 71 [time budget reached] not starting efficientnet_b0_group_none_s2_no_pretrained
+39849.0s 72 {
+39849.0s 73 "stage": "audits",
+39849.0s 74 "hours": 11.05,
+39849.0s 75 "done": 44,
+39849.0s 76 "skipped_already_done": 0,
+39849.0s 77 "failed": []
+39849.0s 78 }
+39852.1s 79 -rw-r--r-- 1 root root 16M Nov 14 05:44 cxr4_results.zip
+39854.7s 80 /usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\|'
+39854.7s 81 cells[i][c] = re.sub('\\\\\|', '|', cell)
+39854.8s 82 /usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\_'
+39854.8s 83 text = re.sub(r'_', '\_', text) # Escape underscores in display text
+39855.6s 84 [NbConvertApp] Converting notebook __notebook__.ipynb to notebook
+39855.7s 85 [NbConvertApp] Writing 46710 bytes to __notebook__.ipynb
+39858.1s 86 [NbConvertApp] Converting notebook __notebook__.ipynb to html
+39858.6s 87 [NbConvertApp] Writing 323509 bytes to __results__.html

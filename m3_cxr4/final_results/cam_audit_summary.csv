@@ -1,0 +1,7 @@
+run,arch,n,lung_focus_mean,lung_focus_sd,pointing_game,lung_area_mean
+resnet50_group_none_s0,resnet50,400,0.3283,0.0981,0.3975,0.2389
+densenet121_group_none_s0,densenet121,400,0.3074,0.0751,0.4425,0.2389
+efficientnet_b0_group_none_s0,efficientnet_b0,400,0.3706,0.0812,0.565,0.2389
+convnext_tiny_group_none_s0,convnext_tiny,400,0.2736,0.1293,0.2575,0.2389
+vit_b_16_group_none_s0,vit_b_16,400,0.195,0.1139,0.14,0.2389
+swin_t_group_none_s0,swin_t,400,0.3536,0.106,0.5225,0.2389
